@@ -1,8 +1,16 @@
 <?xml version="1.0" ?>
 <robot name="crawly">
 
-<material name="silver">
-  <color rgba="0.700 0.700 0.700 1.000"/>
+<material name="black">
+  <color rgba="0.035 0.012 0.329 1.000"/>
+</material>
+
+<material name="green">
+  <color rgba="0.043 0.549 0.09 1.000"/>
+</material>
+
+<material name="red">
+  <color rgba="0.8 0.102 0.102 1.000"/>
 </material>
 
 <link name="base_link">
@@ -16,7 +24,7 @@
     <geometry>
       <mesh filename="meshes/base_link.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="black"/>
     <material/>
   </visual>
   <collision>
@@ -38,7 +46,7 @@
     <geometry>
       <mesh filename="meshes/link1_v13_31.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="green"/>
     <material/>
   </visual>
   <collision>
@@ -60,7 +68,7 @@
     <geometry>
       <mesh filename="meshes/link1_v13_21.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="green"/>
     <material/>
   </visual>
   <collision>
@@ -82,7 +90,7 @@
     <geometry>
       <mesh filename="meshes/link1_v13_11.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="green"/>
     <material/>
   </visual>
   <collision>
@@ -104,7 +112,7 @@
     <geometry>
       <mesh filename="meshes/link1_v131.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="green"/>
     <material/>
   </visual>
   <collision>
@@ -126,7 +134,7 @@
     <geometry>
       <mesh filename="meshes/link2_v9_21.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="red"/>
     <material/>
   </visual>
   <collision>
@@ -148,7 +156,7 @@
     <geometry>
       <mesh filename="meshes/link2_v9_31.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="red"/>
     <material/>
   </visual>
   <collision>
@@ -170,7 +178,7 @@
     <geometry>
       <mesh filename="meshes/link2_v91.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="red"/>
     <material/>
   </visual>
   <collision>
@@ -192,7 +200,7 @@
     <geometry>
       <mesh filename="meshes/link2_v9_11.stl" scale="0.001 0.001 0.001"/>
     </geometry>
-    <material name="silver"/>
+    <material name="red"/>
     <material/>
   </visual>
   <collision>
