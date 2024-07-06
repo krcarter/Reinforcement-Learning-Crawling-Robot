@@ -38,15 +38,15 @@ def load_and_visualize_urdf(urdf_path):
     print("NumJoints: ", p.getNumJoints(urdf_id))
     initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
 
+    '''
     for joint in range(num_joint):
+        p.enableJointForceTorqueSensor(urdf_id, joint, 1)
         print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
-        #p.resetJointState(urdf_id, joint, initial_joint_angles[joint])
-
     print('Joint States')
     joint_state = p.getJointStates(urdf_id, joint_index_list)
     # position
-
-    print(joint_state)
+     print(joint_state)
+    '''
 
     # Commanding Joints
     # p.setJointMotorControlArray(
@@ -65,6 +65,11 @@ def load_and_visualize_urdf(urdf_path):
 
     for joint in range(num_joint):
         p.resetJointState(urdf_id, joint,initial_joint_angles[joint])
+        p.enableJointForceTorqueSensor(urdf_id, joint, 1)
+        print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
+    print('Joint States')
+    joint_state = p.getJointStates(urdf_id, joint_index_list)
+    print(joint_state)
 
     # Run the simulation
     while True:
