@@ -67,9 +67,25 @@ def load_and_visualize_urdf(urdf_path):
         p.resetJointState(urdf_id, joint,initial_joint_angles[joint])
         p.enableJointForceTorqueSensor(urdf_id, joint, 1)
         print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
-    print('Joint States')
+
+    print('Joint States: ')
     joint_state = p.getJointStates(urdf_id, joint_index_list)
     print(joint_state)
+
+    print('Link States: ')
+    link_states = p.getLinkStates(urdf_id, joint_index_list)
+    print(link_states)
+    
+    print('Base Velocity: ')
+    base_velocity = p.getBaseVelocity(urdf_id)
+    print(base_velocity)
+
+    print('Num Bodies: ')
+    print(p.getNumBodies())
+
+    print('Body Info: ')
+    print(p.getBodyInfo)
+
 
     # Run the simulation
     while True:
