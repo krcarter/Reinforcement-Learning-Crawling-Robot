@@ -215,39 +215,12 @@
   </collision>
 </link>
 
-<joint name="th_4" type="continuous">
-  <origin xyz="0.0875 0.015 -0.07" rpy="0 0 0"/>
+<joint name="th_1" type="continuous">
+  <origin xyz="0.0875 0.015 0.07" rpy="0 0 0"/>
   <parent link="base_link"/>
-  <child link="L1_BL1"/>
+  <child link="L1_FL1"/>
   <axis xyz="-1.0 0.0 0.0"/>
 </joint>
-<transmission name="th_4_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_4">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_4_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
-
-<joint name="th_3" type="continuous">
-  <origin xyz="-0.0875 0.015 -0.07" rpy="0 0 0"/>
-  <parent link="base_link"/>
-  <child link="L1_BR1"/>
-  <axis xyz="1.0 0.0 0.0"/>
-</joint>
-<transmission name="th_3_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_3">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_3_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
 
 <joint name="th_2" type="continuous">
   <origin xyz="-0.0875 0.015 0.07" rpy="0 0 0"/>
@@ -255,50 +228,20 @@
   <child link="L1_FR1"/>
   <axis xyz="1.0 0.0 0.0"/>
 </joint>
-<transmission name="th_2_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_2">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_2_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
 
-<joint name="th_1" type="continuous">
-  <origin xyz="0.0875 0.015 0.07" rpy="0 0 0"/>
+<joint name="th_3" type="continuous">
+  <origin xyz="-0.0875 0.015 -0.07" rpy="0 0 0"/>
   <parent link="base_link"/>
-  <child link="L1_FL1"/>
+  <child link="L1_BR1"/>
+  <axis xyz="1.0 0.0 0.0"/>
+</joint>
+
+<joint name="th_4" type="continuous">
+  <origin xyz="0.0875 0.015 -0.07" rpy="0 0 0"/>
+  <parent link="base_link"/>
+  <child link="L1_BL1"/>
   <axis xyz="-1.0 0.0 0.0"/>
 </joint>
-<transmission name="th_1_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_1">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_1_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
-
-<joint name="th_6" type="continuous">
-  <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
-  <parent link="L1_FR1"/>
-  <child link="L2_FR1"/>
-  <axis xyz="1.0 -0.0 -0.0"/>
-</joint>
-<transmission name="th_6_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_6">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_6_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
 
 <joint name="th_5" type="continuous">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
@@ -306,16 +249,14 @@
   <child link="L2_FL1"/>
   <axis xyz="-1.0 -0.0 0.0"/>
 </joint>
-<transmission name="th_5_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_5">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_5_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
+
+<joint name="th_6" type="continuous">
+  <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
+  <parent link="L1_FR1"/>
+  <child link="L2_FR1"/>
+  <axis xyz="1.0 -0.0 -0.0"/>
+</joint>
+
 
 <joint name="th_7" type="continuous">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
@@ -323,16 +264,6 @@
   <child link="L2_BR1"/>
   <axis xyz="1.0 -0.0 -0.0"/>
 </joint>
-<transmission name="th_7_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_7">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_7_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
 
 <joint name="th_8" type="continuous">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
@@ -340,15 +271,6 @@
   <child link="L2_BL1"/>
   <axis xyz="-1.0 -0.0 0.0"/>
 </joint>
-<transmission name="th_8_tran">
-  <type>transmission_interface/SimpleTransmission</type>
-  <joint name="th_8">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-  </joint>
-  <actuator name="th_8_actr">
-    <hardwareInterface>PositionJointInterface</hardwareInterface>
-    <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-</transmission>
+
 
 </robot>
