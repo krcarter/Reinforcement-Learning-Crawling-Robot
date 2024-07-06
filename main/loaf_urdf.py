@@ -1,5 +1,6 @@
 import pybullet as p
 import pybullet_data
+import numpy as np
 import time
 import os
 
@@ -26,6 +27,8 @@ def load_and_visualize_urdf(urdf_path):
     # Load the URDF file
     urdf_id = p.loadURDF(urdf_path)
     num_joint = p.getNumJoints(urdf_id)
+    joint_index_list = list(range(num_joint))
+    print(joint_index_list)
 
     ## INFO DEBUGGING ##
 
@@ -33,19 +36,35 @@ def load_and_visualize_urdf(urdf_path):
     # Why is there a joint upper limit for the continous joints???????
 
     print("NumJoints: ", p.getNumJoints(urdf_id))
-    initial_joint_angles = [0, 0, 0, 0, 0, 0, 0, 0]
+    initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
 
-    for joint in range(p.getNumJoints(urdf_id)):
+    for joint in range(num_joint):
         print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
         #p.resetJointState(urdf_id, joint, initial_joint_angles[joint])
+
+    print('Joint States')
+    joint_state = p.getJointStates(urdf_id, joint_index_list)
+    # position
+
+    print(joint_state)
+
+    # Commanding Joints
+    # p.setJointMotorControlArray(
+    #     bodyUniqueId = urdf_id, 
+    #     jointIndices = joint_index_list,
+    #     controlMode = p.POSITION_CONTROL,
+    #     targetPositions = initial_joint_angles)
 
     ## INFO DEBUGGING End ##
 
     #print("JointInfo: ", p.getJointInfo(urdf_id))
     # Set the initial position and orientation of the URDF
     initial_position = [0, 0, 1] #x,y,z
-    initial_orientation = p.getQuaternionFromEuler([0, 0, 0]) # XYZW - rpy?
+    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy?
     p.resetBasePositionAndOrientation(urdf_id, initial_position, initial_orientation)
+
+    for joint in range(num_joint):
+        p.resetJointState(urdf_id, joint,initial_joint_angles[joint])
 
     # Run the simulation
     while True:
