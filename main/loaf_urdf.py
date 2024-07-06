@@ -28,6 +28,7 @@ def load_and_visualize_urdf(urdf_path):
     num_joint = p.getNumJoints(urdf_id)
 
     ## INFO DEBUGGING ##
+
     # joint_order = [1,5,2,6,3,7,4,8]
     # Why is there a joint upper limit for the continous joints???????
 
@@ -35,8 +36,8 @@ def load_and_visualize_urdf(urdf_path):
     initial_joint_angles = [0, 0, 0, 0, 0, 0, 0, 0]
 
     for joint in range(p.getNumJoints(urdf_id)):
-        #print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
-         p.resetJointState(urdf_id, joint, initial_joint_angles[joint])
+        print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
+        #p.resetJointState(urdf_id, joint, initial_joint_angles[joint])
 
     ## INFO DEBUGGING End ##
 
