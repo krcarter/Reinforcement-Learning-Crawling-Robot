@@ -9,7 +9,9 @@ print("Current path:", current_path)
 
 def load_and_visualize_urdf(urdf_path):
     # Connect to PyBullet
-    physicsClient = p.connect(p.GUI)
+    width = 1600
+    height = 900
+    physicsClient = p.connect(p.GUI, options=f'--width={width} --height={height}')
 
     p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
     p.configureDebugVisualizer(p.COV_ENABLE_GUI, 1)
@@ -17,6 +19,14 @@ def load_and_visualize_urdf(urdf_path):
     # Set the path to PyBullet's data directory
     print("Pybullet Path: ", pybullet_data.getDataPath())
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
+
+    # Change the camera view
+    camera_distance = 1.5  # Distance from the target position
+    camera_yaw = 85        # Yaw angle in degrees
+    camera_pitch = -35     # Pitch angle in degrees
+    camera_target_position = [0, 0, 0]  # Target position [x, y, z]
+
+    p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, camera_target_position)
 
     # Set the gravity
     p.setGravity(0, 0, -9.81)
@@ -36,7 +46,9 @@ def load_and_visualize_urdf(urdf_path):
     # Why is there a joint upper limit for the continous joints???????
 
     print("NumJoints: ", p.getNumJoints(urdf_id))
-    initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
+    #initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
+    initial_joint_angles = [np.pi/4, -np.pi/2, -np.pi/4, np.pi/2, -np.pi/4, np.pi/2, np.pi/4, -np.pi/2] # standing up
+
 
     '''
     for joint in range(num_joint):
