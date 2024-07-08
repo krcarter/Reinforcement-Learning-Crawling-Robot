@@ -5,8 +5,55 @@ import numpy as np
 import time
 import os
 
-current_path = os.path.dirname(os.path.realpath(__file__))
-print("Current path:", current_path)
+
+def fk(th1, th2):
+    l1 = 0.1 # m
+    l2 = 0.1 # m
+
+    th1 = th1 - np.pi/2
+
+    x = l1 * np.cos(th1) + (l1 + l2) * np.cos(th1 + th2)
+    y = l2 * np.sin(th1) + (l1 + l2) * np.sin(th1 + th2)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, y, label='End-Effector Trajectory')
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+    plt.title('Forward Kinematics')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+    return (x,y)
+
+def ik(x, y):
+    l1 = 0.1 # m
+    l2 = 0.1 # m
+
+    th2 = np.arccos((x**2 + y**2 - l1**2 - l2**2)/(2*l1*l2))
+    th1 = np.arctan(y/x) - np.tan( (l2*np.sin(th2))/ (l1 + l2*np.cos(th2)))
+
+    return (th1, th2)
+
+
+def plot_trajectory(time, trajectories):
+    
+    #Plot the trajectories
+    plt.figure(figsize=(12, 8))
+    num_joint = len(trajectories)
+    print('num_joint: ', num_joint)
+    for joint in range(num_joint):
+        print(joint)
+        plt.plot(time, trajectories[joint], label=f'Joint {joint+1}')
+
+    plt.xlabel('Time [s]')
+    plt.ylabel('Joint Angle [rad]')
+    plt.title('Robot Joint trajectories')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+
 
 def crawl_walk(time):
     #
@@ -29,12 +76,15 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
     Amp_fl1 = np.pi / 4
-    offset_fl1 = np.pi / 2 - np.pi / 12
+    phi1 = np.pi/4
+    offset_fl1 = np.pi / 2 - np.pi / 6
+
     Amp_fl2 = np.pi / 2
+    phi2 = np.pi/4
     offset_fl2 = 0
 
-    front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration) + offset_fl1 #Asin(2*pi*f*t) + Ao
-    front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration) + offset_fl2 #Asin(2*pi*f*t) + Ao
+    front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration + phi1) + offset_fl1 #Asin(2*pi*f*t) + Ao
+    front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration + phi2) + offset_fl2 #Asin(2*pi*f*t) + Ao
 
 
     trajectories[0] = front_links_L1
@@ -54,6 +104,8 @@ def crawl_walk(time):
     # plt.grid(True)
     # plt.show()
 
+    plot_trajectory(time_points,trajectories)
+    (x,y) = fk(trajectories[0], trajectories[1])
     return trajectories
 
 def load_and_visualize_urdf(urdf_path):
