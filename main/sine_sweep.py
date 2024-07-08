@@ -21,7 +21,10 @@ def sine_generator(time):
     time_points = np.linspace(0, sweep_duration, num_steps)
 
     # Generate the trajectory using a sine wave
-    trajectory = np.pi * np.sin(2 * np.pi * frequency * time_points / sweep_duration) #Asin(2*pi*f*t)
+    amplitude = np.pi / 2
+    omega = 2 * np.pi * frequency
+    offset = np.pi / 2
+    trajectory = amplitude *  np.sin(omega * time_points / sweep_duration) + offset #Asin(2*pi*f*t)
 
     # Plot the trajectory
     # plt.figure(figsize=(10, 6))
@@ -63,7 +66,9 @@ def load_and_visualize_urdf(urdf_path):
     plane_id = p.loadURDF("plane.urdf")
 
     # Load the URDF file
-    urdf_id = p.loadURDF(urdf_path)
+    flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
+    urdf_id = p.loadURDF(urdf_path, flags=flags)
+    #urdf_id = p.loadURDF(urdf_path)
     num_joint = p.getNumJoints(urdf_id)
     joint_index_list = list(range(num_joint))
     print(joint_index_list)
@@ -123,20 +128,50 @@ def load_and_visualize_urdf(urdf_path):
         print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
 
 
-    traj_duration = 5.0 #seconds
-    traj = sine_generator(traj_duration)
-     # Run the trajectory
-    start_time = time.time()
-    current_time = 0
+    #Generate Trajectory
+    sweep_duration = 5.0 #seconds
+    trajectory = sine_generator(sweep_duration)
+
+    # Generate time points
+    timestep = 1.0 / 240.0
+    num_steps = int(sweep_duration / timestep)
+
+    joint_index = 0
 
     # Run the simulation
     while True:
-        p.stepSimulation()
-        time.sleep(1./240.)
+        start_time = time.time()
+        current_time = 0
 
-        # LOGGGING #
-        crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
-        #print(crawlyPos,crawlyOrn)
+        while current_time < sweep_duration:
+            current_time = time.time() - start_time
+            step = int(current_time / timestep)
+        
+            if step >= num_steps:
+                break
+        
+            target_position = trajectory[step]
+        
+            # Apply the target joint position to the robot
+            p.setJointMotorControl2(
+                bodyUniqueId=urdf_id,
+                jointIndex=joint_index,
+                controlMode=p.POSITION_CONTROL,
+                targetPosition=target_position
+            )
+
+            # Apply the target joint position to the robot
+            p.setJointMotorControl2(
+                bodyUniqueId=urdf_id,
+                jointIndex=2,
+                controlMode=p.POSITION_CONTROL,
+                targetPosition= -1*target_position
+            )
+        
+            # Step the simulation
+            p.stepSimulation()
+            crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+            #print(crawlyPos,crawlyOrn)
 
 
 
