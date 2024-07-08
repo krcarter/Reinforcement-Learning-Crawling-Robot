@@ -8,7 +8,9 @@ import os
 current_path = os.path.dirname(os.path.realpath(__file__))
 print("Current path:", current_path)
 
-def sine_generator(time):
+def crawl_walk(time):
+    #
+    intiial_position = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
@@ -20,23 +22,39 @@ def sine_generator(time):
     num_steps = int(sweep_duration / timestep)
     time_points = np.linspace(0, sweep_duration, num_steps)
 
-    # Generate the trajectory using a sine wave
-    amplitude = np.pi / 2
-    omega = 2 * np.pi * frequency
-    offset = np.pi / 2
-    trajectory = amplitude *  np.sin(omega * time_points / sweep_duration) + offset #Asin(2*pi*f*t)
+    # Generate initial empy list of trajectories
+    # Repeat the values to fill an 8x100 array
+    trajectories = np.tile(intiial_position, (num_steps, 1)).T
 
-    # Plot the trajectory
-    # plt.figure(figsize=(10, 6))
-    # plt.plot(time_points, trajectory, label='Joint 0')
+    # Generate the trajectory using a sine wave
+    omega = 2 * np.pi * frequency
+    Amp_fl1 = np.pi / 4
+    offset_fl1 = np.pi / 2 - np.pi / 12
+    Amp_fl2 = np.pi / 2
+    offset_fl2 = 0
+
+    front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration) + offset_fl1 #Asin(2*pi*f*t) + Ao
+    front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration) + offset_fl2 #Asin(2*pi*f*t) + Ao
+
+
+    trajectories[0] = front_links_L1
+    trajectories[2] = -1 * front_links_L1
+
+    trajectories[1] = front_links_L2
+    trajectories[3] = -1 * front_links_L2
+
+    # plt.figure(figsize=(12, 8))
+    # for joint in range(len(intiial_position)):
+    #     plt.plot(time_points, trajectories[joint], label=f'Joint {joint}')
+
     # plt.xlabel('Time [s]')
     # plt.ylabel('Joint Angle [rad]')
-    # plt.title('Circular Sweep Trajectory')
+    # plt.title('Crawling Trajectory')
     # plt.legend()
     # plt.grid(True)
     # plt.show()
 
-    return trajectory
+    return trajectories
 
 def load_and_visualize_urdf(urdf_path):
     # Connect to PyBullet
@@ -130,7 +148,7 @@ def load_and_visualize_urdf(urdf_path):
 
     #Generate Trajectory
     sweep_duration = 5.0 #seconds
-    trajectory = sine_generator(sweep_duration)
+    trajectory = crawl_walk(sweep_duration) # 8 x n array
 
     # Generate time points
     timestep = 1.0 / 240.0
@@ -150,24 +168,22 @@ def load_and_visualize_urdf(urdf_path):
             if step >= num_steps:
                 break
         
-            target_position = trajectory[step]
-        
-            # Apply the target joint position to the robot
-            p.setJointMotorControl2(
-                bodyUniqueId=urdf_id,
-                jointIndex=joint_index,
-                controlMode=p.POSITION_CONTROL,
-                targetPosition=target_position
-            )
+            target_position = trajectory[:, step]
 
-            # Apply the target joint position to the robot
-            p.setJointMotorControl2(
-                bodyUniqueId=urdf_id,
-                jointIndex=2,
-                controlMode=p.POSITION_CONTROL,
-                targetPosition= -1*target_position
-            )
-        
+            p.setJointMotorControlArray(
+                bodyUniqueId = urdf_id, 
+                jointIndices = joint_index_list,
+                controlMode = p.POSITION_CONTROL,
+                targetPositions = target_position)
+
+            # # Apply the target joint position to the robot
+            # p.setJointMotorControl2(
+            #     bodyUniqueId=urdf_id,
+            #     jointIndex=joint_index,
+            #     controlMode=p.POSITION_CONTROL,
+            #     targetPosition=target_position
+            # )
+      
             # Step the simulation
             p.stepSimulation()
             crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
