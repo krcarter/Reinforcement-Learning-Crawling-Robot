@@ -8,9 +8,14 @@
 
  To create your own custom URDF for bullet using fusion 360 for CAD checkout this github repo
 
- * https://github.com/yanshil/Fusion2PyBullet
+ * https://github.com/yanshil/Fusion2PyBullet (Need to change the color, remove transmissions)
+ 
 
 # Dependencies
 
 * Pybullet
 * Microsoft C++ Build Tools
+
+# References
+
+* Kamidi, Vinay R., Wael Saab, and Pinhas Ben-Tzvi. "Design and analysis of a novel planar robotic leg for high-speed locomotion." 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2017.
