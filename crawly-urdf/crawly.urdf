@@ -223,54 +223,61 @@
   <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_2" type="continuous">
+<joint name="th_2" type="revolute">
   <origin xyz="-0.0875 0.015 0.07" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="L1_FR1"/>
   <axis xyz="1.0 0.0 0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_3" type="continuous">
+<joint name="th_3" type="revolute">
   <origin xyz="-0.0875 0.015 -0.07" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="L1_BR1"/>
   <axis xyz="1.0 0.0 0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_4" type="continuous">
+<joint name="th_4" type="revolute">
   <origin xyz="0.0875 0.015 -0.07" rpy="0 0 0"/>
   <parent link="base_link"/>
   <child link="L1_BL1"/>
   <axis xyz="-1.0 0.0 0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_5" type="continuous">
+<joint name="th_5" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
   <parent link="L1_FL1"/>
   <child link="L2_FL1"/>
   <axis xyz="-1.0 -0.0 0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_6" type="continuous">
+<joint name="th_6" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
   <parent link="L1_FR1"/>
   <child link="L2_FR1"/>
   <axis xyz="1.0 -0.0 -0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
 
-<joint name="th_7" type="continuous">
+<joint name="th_7" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
   <parent link="L1_BR1"/>
   <child link="L2_BR1"/>
   <axis xyz="1.0 -0.0 -0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
-<joint name="th_8" type="continuous">
+<joint name="th_8" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
   <parent link="L1_BL1"/>
   <child link="L2_BL1"/>
   <axis xyz="-1.0 -0.0 0.0"/>
+  <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
 
