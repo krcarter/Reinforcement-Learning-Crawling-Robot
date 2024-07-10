@@ -1,2 +1,1 @@
-
-    # Repeat the values to fill an 8x100 array
+p.sin(th2)), (L1 + L2*np.cos(th2)))

@@ -80,7 +80,7 @@ def ik(x, y):
         raise ValueError("The point (x, y) is not reachable with the given link lengths.")
     
     th2 = np.arccos((x**2 + y**2 - L1**2 - L2**2)/(2*L1*L2))
-    th1 = np.arctan2(y,x) - np.arctan2( (L2*np.sin(th2)), (L1 + L2*np.cos(th2)))
+    th1 = np.arctan(y/x) - np.arctan( (L2*np.sin(th2))/ (L1 + L2*np.cos(th2)))
 
     return (th1, th2)
 
@@ -153,9 +153,9 @@ def walk(time):
 
     # Parameters
     a = 0.3/2  # Major axis length
-    b = 0.3/2  # Minor axis length
+    b = 0.25/2  # Minor axis length
     origin = (0.0, 0.0)  # Origin of the ellipse
-    rotation_angle = np.pi + np.pi/12  # Rotation angle in radians
+    rotation_angle = -np.pi/12  # Rotation angle in radians
 
     # Generate half ellipse points
     x, y = half_ellipse(a, b, origin, rotation_angle, num_steps)

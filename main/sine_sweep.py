@@ -10,7 +10,7 @@ def fk(th1, th2):
     l1 = 0.1 # m
     l2 = 0.1 # m
 
-    th1 = th1 - np.pi/2
+    #th1 = th1 - np.pi/2
 
     x = l1 * np.cos(th1) + (l1 + l2) * np.cos(th1 + th2)
     y = l2 * np.sin(th1) + (l1 + l2) * np.sin(th1 + th2)
