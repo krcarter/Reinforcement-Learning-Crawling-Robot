@@ -5,15 +5,59 @@ import numpy as np
 import time
 import os
 
+L1 = 0.1 # m
+L2 = 0.1 # m
+
+def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
+    """
+    Generates the points for a half ellipse.
+    
+    Parameters:
+    a (float): Major axis length.
+    b (float): Minor axis length.
+    origin (tuple): (x, y) coordinates of the ellipse's center.
+    rotation_angle (float): Angle to rotate the ellipse (in radians).
+    
+    Returns:
+    x_rotated (ndarray): x coordinates of the half ellipse.
+    y_rotated (ndarray): y coordinates of the half ellipse.
+    """
+    swing_speed = 0.75 # 0 to 1
+    swing_pts = int(num_pts*(1-swing_speed))
+    stance_pts = int(num_pts*(swing_speed))
+
+    theta = np.linspace(0, np.pi, stance_pts)
+    x = a * np.cos(theta)
+    y = b * np.sin(theta)
+
+    # Rotation matrix
+    R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
+                  [np.sin(rotation_angle), np.cos(rotation_angle)]])
+
+    # Rotate and translate the points
+    ellipse_points = np.array([x, y])
+    rotated_points = R @ ellipse_points
+    x_rotated, y_rotated = rotated_points[0] + origin[0], rotated_points[1] + origin[1]
+    
+    xo = x_rotated[0]
+    xf = x_rotated[-1]
+    yo = y_rotated[0]
+    yf = y_rotated[-1]
+
+    xline = np.linspace(xo, xf, swing_pts)
+    yline = np.linspace(yo, yf, swing_pts)
+
+    x_final = np.concatenate((x_rotated,xline))
+    y_final = np.concatenate((y_rotated,yline))
+    
+
+    return x_final, y_final
 
 def fk(th1, th2):
-    l1 = 0.1 # m
-    l2 = 0.1 # m
+    th1 = th1 - np.pi/2 # do this to rotate the zero position I want it so leg laying flat is zero  o - -
 
-    th1 = th1 - np.pi/2
-
-    x = l1 * np.cos(th1) + (l1 + l2) * np.cos(th1 + th2)
-    y = l2 * np.sin(th1) + (l1 + l2) * np.sin(th1 + th2)
+    x = L1 * np.cos(th1) + (L1 + L2) * np.cos(th1 + th2)
+    y = L2 * np.sin(th1) + (L1 + L2) * np.sin(th1 + th2)
 
     plt.figure(figsize=(10, 6))
     plt.plot(x, y, label='End-Effector Trajectory')
@@ -27,14 +71,31 @@ def fk(th1, th2):
     return (x,y)
 
 def ik(x, y):
-    l1 = 0.1 # m
-    l2 = 0.1 # m
 
-    th2 = np.arccos((x**2 + y**2 - l1**2 - l2**2)/(2*l1*l2))
-    th1 = np.arctan(y/x) - np.tan( (l2*np.sin(th2))/ (l1 + l2*np.cos(th2)))
+     # Calculate the distance from the origin to the point (x, y)
+    r = np.sqrt(x**2 + y**2)
+
+    # Check if the point is reachable
+    if r > (L1 + L2) or r < np.abs(L1 - L2):
+        raise ValueError("The point (x, y) is not reachable with the given link lengths.")
+    
+    th2 = np.arccos((x**2 + y**2 - L1**2 - L2**2)/(2*L1*L2))
+    th1 = np.arctan2(y,x) - np.arctan2( (L2*np.sin(th2)), (L1 + L2*np.cos(th2)))
 
     return (th1, th2)
 
+def trajectory_to_angles(x,y):
+    num_step = len(x)
+    theta1_list = []
+    theta2_list = []
+    for point in range(num_step):
+        x_curr = x[point]
+        y_curr = y[point]
+        theta1, theta2 = ik(x_curr, y_curr)
+        theta1_list.append(theta1)
+        theta2_list.append(theta2)
+
+    return (np.array(theta1_list), np.array(theta2_list))
 
 def plot_trajectory(time, trajectories):
     
@@ -53,9 +114,26 @@ def plot_trajectory(time, trajectories):
     plt.grid(True)
     plt.show()
 
+def plot_xy(x, y):
+    """
+    Plots the ellipse using the provided x and y coordinates.
+    """
+    plt.figure(figsize=(8, 6))
+    plt.plot(x, y, label="XY")
+    plt.scatter([x[0], x[-1]], [y[0], y[-1]], color='red')  # Plot endpoints for clarity
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.axvline(0, color='black',linewidth=0.5)
+    plt.grid(color = 'gray', linestyle = '--', linewidth = 0.5)
+    plt.legend()
+    plt.title('XY Plot')
+    plt.axis('equal')
+    plt.show()
 
 
-def crawl_walk(time):
+
+def walk(time):
     #
     intiial_position = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
     # Define the parameters for the circular sweep
@@ -73,39 +151,31 @@ def crawl_walk(time):
     # Repeat the values to fill an 8x100 array
     trajectories = np.tile(intiial_position, (num_steps, 1)).T
 
-    # Generate the trajectory using a sine wave
-    omega = 2 * np.pi * frequency
-    Amp_fl1 = np.pi / 4
-    phi1 = np.pi/4
-    offset_fl1 = np.pi / 2 - np.pi / 6
+    # Parameters
+    a = 0.3/2  # Major axis length
+    b = 0.3/2  # Minor axis length
+    origin = (0.0, 0.0)  # Origin of the ellipse
+    rotation_angle = np.pi + np.pi/12  # Rotation angle in radians
 
-    Amp_fl2 = np.pi / 2
-    phi2 = np.pi/4
-    offset_fl2 = 0
+    # Generate half ellipse points
+    x, y = half_ellipse(a, b, origin, rotation_angle, num_steps)
 
-    front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration + phi1) + offset_fl1 #Asin(2*pi*f*t) + Ao
-    front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration + phi2) + offset_fl2 #Asin(2*pi*f*t) + Ao
+    plot_xy(x,y)
 
+    (theta1,theta2) =  trajectory_to_angles(x,y)
 
-    trajectories[0] = front_links_L1
-    trajectories[2] = -1 * front_links_L1
+    print('THETAS')
+    print(theta1)
+    print(theta1.shape)
+    print(theta2)
+    print(theta2.shape)
+    
+    trajectories[0] = theta1
+    trajectories[1] = theta2
 
-    trajectories[1] = front_links_L2
-    trajectories[3] = -1 * front_links_L2
-
-    # plt.figure(figsize=(12, 8))
-    # for joint in range(len(intiial_position)):
-    #     plt.plot(time_points, trajectories[joint], label=f'Joint {joint}')
-
-    # plt.xlabel('Time [s]')
-    # plt.ylabel('Joint Angle [rad]')
-    # plt.title('Crawling Trajectory')
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
 
     plot_trajectory(time_points,trajectories)
-    (x,y) = fk(trajectories[0], trajectories[1])
+
     return trajectories
 
 def load_and_visualize_urdf(urdf_path):
@@ -200,7 +270,7 @@ def load_and_visualize_urdf(urdf_path):
 
     #Generate Trajectory
     sweep_duration = 5.0 #seconds
-    trajectory = crawl_walk(sweep_duration) # 8 x n array
+    trajectory = walk(sweep_duration) # 8 x n array
 
     # Generate time points
     timestep = 1.0 / 240.0
@@ -229,7 +299,7 @@ def load_and_visualize_urdf(urdf_path):
                 targetPositions = target_position)
 
             # # Apply the target joint position to the robot
-            # p.setJointMotorControl2(
+            # p.setJointMotorControL2(
             #     bodyUniqueId=urdf_id,
             #     jointIndex=joint_index,
             #     controlMode=p.POSITION_CONTROL,
@@ -238,7 +308,7 @@ def load_and_visualize_urdf(urdf_path):
       
             # Step the simulation
             p.stepSimulation()
-            crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+            #crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
             #print(crawlyPos,crawlyOrn)
 
 
