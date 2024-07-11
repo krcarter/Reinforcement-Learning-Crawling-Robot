@@ -83,15 +83,31 @@ def crawl_walk(time):
     phi2 = np.pi/4
     offset_fl2 = 0
 
+    Amp_b = np.pi / 6
+    phi_b = np.pi/2
+    offset_b = np.pi / 6
+
+    Amp_b2 = np.pi / 6
+    phi_b2 = np.pi/2
+    offset_b2 = -np.pi / 6
+
     front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration + phi1) + offset_fl1 #Asin(2*pi*f*t) + Ao
     front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration + phi2) + offset_fl2 #Asin(2*pi*f*t) + Ao
 
+    back_links_L1 = Amp_b * np.sin(omega * time_points / sweep_duration + phi_b) + offset_b
+    back_links_L2 = Amp_b2 * np.sin(omega * time_points / sweep_duration + phi_b2) + offset_b2
 
-    trajectories[0] = front_links_L1
-    trajectories[2] = -1 * front_links_L1
+    # trajectories[0] = front_links_L1
+    # trajectories[2] = -1 * front_links_L1
 
-    trajectories[1] = front_links_L2
-    trajectories[3] = -1 * front_links_L2
+    # trajectories[1] = front_links_L2
+    # trajectories[3] = -1 * front_links_L2
+
+    trajectories[4] = back_links_L1
+    trajectories[5] = back_links_L2
+
+    trajectories[6] = -1* back_links_L1
+    trajectories[7] = -1* back_links_L2
 
     # plt.figure(figsize=(12, 8))
     # for joint in range(len(intiial_position)):
@@ -106,6 +122,7 @@ def crawl_walk(time):
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
+    (x1,y1) = fk(trajectories[4], trajectories[5])
     return trajectories
 
 def load_and_visualize_urdf(urdf_path):

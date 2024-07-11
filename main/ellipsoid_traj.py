@@ -23,7 +23,7 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     y_rotated (ndarray): y coordinates of the half ellipse.
     """
 
-    swing_speed = 0.1 # 0 to 1
+    swing_speed = 0.5 # 0 to 1
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
     
@@ -186,24 +186,36 @@ def walk(time):
     trajectories = np.tile(intiial_position, (num_steps, 1)).T
 
     # Parameters
-    a = 0.3/2  # Major axis length
-    b = 0.25/2  # Minor axis length
-    origin = (0.0, 0.0)  # Origin of the ellipse
-    rotation_angle = -np.pi/12  # Rotation angle in radians
+    a1 = 0.3/2  # Major axis length
+    b1 = 0.25/2  # Minor axis length
+    origin1 = (0.0, 0.0)  # Origin of the ellipse
+    rotation_angle1 = -np.pi/12  # Rotation angle in radians
 
     # Generate half ellipse points
-    xf, yf = half_ellipse(a, b, origin, rotation_angle, num_steps)
-
+    xf, yf = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
     plot_xy(xf,yf)
-
     (theta0,theta1) =  trajectory_to_angles(xf,yf)
 
-    
-    trajectories[0] = theta0
-    trajectories[1] = theta1
 
-    trajectories[2] = -1*theta0
-    trajectories[3] = -1*theta1
+    # Parameters
+    a2 = 0.3/2  # Major axis length
+    b2 = 0.25/2  # Minor axis length
+    origin2 = (0.0, 0.0)  # Origin of the ellipse
+    rotation_angle2 = -np.pi/4  # Rotation angle in radians
+
+    xb, yb = half_ellipse(a2, b2, origin2, rotation_angle2, num_steps)
+    plot_xy(xb,yb)
+    (theta4,theta5) =  trajectory_to_angles(xb,yb)
+
+    
+    # trajectories[0] = theta0
+    # trajectories[1] = theta1
+    # trajectories[2] = -1*theta0
+    # trajectories[3] = -1*theta1
+    trajectories[4] = theta4
+    trajectories[5] = theta5
+    trajectories[6] = -1*theta4
+    trajectories[7] = -1*theta5
 
 
     plot_trajectory(time_points,trajectories)
@@ -224,7 +236,7 @@ def load_and_visualize_urdf(urdf_path):
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
     # Change the camera view
-    camera_distance = 1.5  # Distance from the target position
+    camera_distance = 1.0  # Distance from the target position
     camera_yaw = 85        # Yaw angle in degrees
     camera_pitch = -35     # Pitch angle in degrees
     camera_target_position = [0, 0, 0]  # Target position [x, y, z]
