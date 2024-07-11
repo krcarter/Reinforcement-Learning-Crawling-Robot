@@ -22,13 +22,20 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     x_rotated (ndarray): x coordinates of the half ellipse.
     y_rotated (ndarray): y coordinates of the half ellipse.
     """
-    swing_speed = 0.75 # 0 to 1
+
+    swing_speed = 0.1 # 0 to 1
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
-
+    
     theta = np.linspace(0, np.pi, stance_pts)
+    theta_inner = np.linspace(0, np.pi, swing_pts)
+
     x = a * np.cos(theta)
     y = b * np.sin(theta)
+
+    minor_axis_shrink = 4
+    x_inner = a * np.cos(theta_inner)
+    y_inner = b/minor_axis_shrink * np.sin(theta_inner)
 
     # Rotation matrix
     R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
@@ -36,20 +43,35 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
     # Rotate and translate the points
     ellipse_points = np.array([x, y])
+    ellipse_inner_points = np.array([x_inner, y_inner])
+
     rotated_points = R @ ellipse_points
+    rotated_inner_points = R @ ellipse_inner_points
+
     x_rotated, y_rotated = rotated_points[0] + origin[0], rotated_points[1] + origin[1]
+    x_inner_rotated, y_inner_rotated = rotated_inner_points[0] + origin[0], rotated_inner_points[1] + origin[1]
     
-    xo = x_rotated[0]
-    xf = x_rotated[-1]
-    yo = y_rotated[0]
-    yf = y_rotated[-1]
+    # xo = x_rotated[0]
+    # xf = x_rotated[-1]
+    # yo = y_rotated[0]
+    # yf = y_rotated[-1]
 
-    xline = np.linspace(xo, xf, swing_pts)
-    yline = np.linspace(yo, yf, swing_pts)
+    # xline = np.linspace(xo, xf, swing_pts)
+    # yline = np.linspace(yo, yf, swing_pts)
 
-    x_final = np.concatenate((x_rotated,xline))
-    y_final = np.concatenate((y_rotated,yline))
-    
+    # x_final = np.concatenate((x_rotated,xline))
+    # y_final = np.concatenate((y_rotated,yline))
+
+    x_final = x_inner_rotated
+    y_final = y_inner_rotated
+
+    x_final = np.concatenate((x_rotated,x_inner_rotated[::-1]))
+    y_final = np.concatenate((y_rotated,y_inner_rotated[::-1]))
+
+    print(x_final)
+    print(x_final.shape)
+    print(y_final)
+    print(y_final.shape)
 
     return x_final, y_final
 
@@ -79,10 +101,22 @@ def ik(x, y):
     if r > (L1 + L2) or r < np.abs(L1 - L2):
         raise ValueError("The point (x, y) is not reachable with the given link lengths.")
     
-    th2 = np.arccos((x**2 + y**2 - L1**2 - L2**2)/(2*L1*L2))
-    th1 = np.arctan(y/x) - np.arctan( (L2*np.sin(th2))/ (L1 + L2*np.cos(th2)))
+    # th2 = np.arccos((x**2 + y**2 - L1**2 - L2**2)/(2*L1*L2))
+    # th1 = np.arctan(y/x) - np.arctan( (L2*np.sin(th2))/ (L1 + L2*np.cos(th2)))
 
-    return (th1, th2)
+    # Calculate the angle theta2 using the law of cosines
+    cos_theta2 = (x**2 + y**2 - L1**2 - L2**2) / (2 * L1 * L2)
+    sin_theta2 = np.sqrt(1 - cos_theta2**2)  # sin(theta2) could be positive or negative
+
+    theta2 = np.arctan2(sin_theta2, cos_theta2)
+
+    # Calculate the angle theta1
+    k1 = L1 + L2 * cos_theta2
+    k2 = L2 * sin_theta2
+
+    theta1 = np.arctan2(y, x) - np.arctan2(k2, k1)
+    
+    return (theta1, theta2)
 
 def trajectory_to_angles(x,y):
     num_step = len(x)
@@ -158,20 +192,18 @@ def walk(time):
     rotation_angle = -np.pi/12  # Rotation angle in radians
 
     # Generate half ellipse points
-    x, y = half_ellipse(a, b, origin, rotation_angle, num_steps)
+    xf, yf = half_ellipse(a, b, origin, rotation_angle, num_steps)
 
-    plot_xy(x,y)
+    plot_xy(xf,yf)
 
-    (theta1,theta2) =  trajectory_to_angles(x,y)
+    (theta0,theta1) =  trajectory_to_angles(xf,yf)
 
-    print('THETAS')
-    print(theta1)
-    print(theta1.shape)
-    print(theta2)
-    print(theta2.shape)
     
-    trajectories[0] = theta1
-    trajectories[1] = theta2
+    trajectories[0] = theta0
+    trajectories[1] = theta1
+
+    trajectories[2] = -1*theta0
+    trajectories[3] = -1*theta1
 
 
     plot_trajectory(time_points,trajectories)
