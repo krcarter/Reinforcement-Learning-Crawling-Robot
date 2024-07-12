@@ -57,7 +57,7 @@ def plot_trajectory(time, trajectories):
 
 def crawl_walk(time):
     #
-    intiial_position = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
+    intiial_position = [-np.pi/12, np.pi/2, np.pi/12, -np.pi/2, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
@@ -70,55 +70,32 @@ def crawl_walk(time):
     time_points = np.linspace(0, sweep_duration, num_steps)
 
     # Generate initial empy list of trajectories
-    # Repeat the values to fill an 8x100 array
+    # Repeat the values to fill an 8xsteps array
     trajectories = np.tile(intiial_position, (num_steps, 1)).T
+    
+
 
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
-    Amp_fl1 = np.pi / 4
-    phi1 = np.pi/4
-    offset_fl1 = np.pi / 2 - np.pi / 6
 
-    Amp_fl2 = np.pi / 2
-    phi2 = np.pi/4
-    offset_fl2 = 0
+    Amp = [np.pi/12, np.pi/4, np.pi/12, np.pi/4, 0, 0, 0, 0] 
+    phi = [np.pi/4, np.pi/4, np.pi/4, np.pi/4, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    Amp0 = [-np.pi/12, 0, np.pi/12, 0, 0, 0, 0, 0]
+    thetas = np.tile(intiial_position, (num_steps, 1)).T
 
-    Amp_b = np.pi / 6
-    phi_b = np.pi/2
-    offset_b = np.pi / 6
+    for joint in range(len(intiial_position)):
 
-    Amp_b2 = np.pi / 6
-    phi_b2 = np.pi/2
-    offset_b2 = -np.pi / 6
+        Amp_i = Amp[joint]
+        phi_i = phi[joint]
+        Amp0_i = Amp0[joint]
 
-    front_links_L1 = Amp_fl1 *  np.sin(omega * time_points / sweep_duration + phi1) + offset_fl1 #Asin(2*pi*f*t) + Ao
-    front_links_L2 = Amp_fl2 *  np.sin(omega * time_points / sweep_duration + phi2) + offset_fl2 #Asin(2*pi*f*t) + Ao
+        thetas[joint] =  Amp_i * np.sin(omega * time_points / sweep_duration + phi_i) + Amp0_i #Asin(2*pi*f*t) + Ao
 
-    back_links_L1 = Amp_b * np.sin(omega * time_points / sweep_duration + phi_b) + offset_b
-    back_links_L2 = Amp_b2 * np.sin(omega * time_points / sweep_duration + phi_b2) + offset_b2
 
-    trajectories[0] = front_links_L1
-    trajectories[2] = -1 * front_links_L1
-
-    trajectories[1] = front_links_L2
-    trajectories[3] = -1 * front_links_L2
-
-    # trajectories[4] = back_links_L1
-    # trajectories[5] = back_links_L2
-
-    # trajectories[6] = -1* back_links_L1
-    # trajectories[7] = -1* back_links_L2
-
-    # plt.figure(figsize=(12, 8))
-    # for joint in range(len(intiial_position)):
-    #     plt.plot(time_points, trajectories[joint], label=f'Joint {joint}')
-
-    # plt.xlabel('Time [s]')
-    # plt.ylabel('Joint Angle [rad]')
-    # plt.title('Crawling Trajectory')
-    # plt.legend()
-    # plt.grid(True)
-    # plt.show()
+    # trajectories[0] = thetas[0]
+    # trajectories[1] = thetas[1]
+    # trajectories[2] = thetas[2]
+    # trajectories[3] = thetas[3]
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
@@ -152,12 +129,18 @@ def load_and_visualize_urdf(urdf_path):
     # Create a plane for the URDF to stand on
     plane_id = p.loadURDF("plane.urdf")
 
+    #Set Friction Properties
+    p.changeDynamics(plane_id, -1, lateralFriction=1.0)
+    print('Dynamics info: ', p.getDynamicsInfo(plane_id, -1))
+
     # Load the URDF file
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
     urdf_id = p.loadURDF(urdf_path, flags=flags)
     #urdf_id = p.loadURDF(urdf_path)
     num_joint = p.getNumJoints(urdf_id)
     joint_index_list = list(range(num_joint))
+    #Set Friction Properties
+    print('Dynamics info crawly: ', p.getDynamicsInfo(urdf_id, 0))
     print(joint_index_list)
 
     ## INFO DEBUGGING ##
@@ -255,7 +238,7 @@ def load_and_visualize_urdf(urdf_path):
       
             # Step the simulation
             p.stepSimulation()
-            crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+            #crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
             #print(crawlyPos,crawlyOrn)
 
 
