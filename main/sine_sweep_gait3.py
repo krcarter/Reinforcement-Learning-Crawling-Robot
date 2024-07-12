@@ -60,7 +60,7 @@ def crawl_walk(time):
     intiial_position = [-np.pi/12, np.pi/2, np.pi/12, -np.pi/2, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
-    frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
+    frequency = 10.0       # frequency of the sine wave (1 cycle per sweep_duration)
 
     # Define the simulation timestep
     timestep = 1.0 / 240.0
@@ -78,9 +78,9 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
 
-    Amp = [np.pi/12, np.pi/4, np.pi/12, np.pi/4, 0, 0, 0, 0] 
+    Amp = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
     phi = [np.pi/4, np.pi/4, np.pi/4, np.pi/4, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
-    Amp0 = [-np.pi/12, 0, np.pi/12, 0, 0, 0, 0, 0]
+    Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi/2, 0, 0, 0, 0]
     thetas = np.tile(intiial_position, (num_steps, 1)).T
 
     for joint in range(len(intiial_position)):
@@ -92,10 +92,10 @@ def crawl_walk(time):
         thetas[joint] =  Amp_i * np.sin(omega * time_points / sweep_duration + phi_i) + Amp0_i #Asin(2*pi*f*t) + Ao
 
 
-    # trajectories[0] = thetas[0]
-    # trajectories[1] = thetas[1]
-    # trajectories[2] = thetas[2]
-    # trajectories[3] = thetas[3]
+    trajectories[0] = thetas[0]
+    trajectories[1] = thetas[1]
+    trajectories[2] = thetas[2]
+    trajectories[3] = thetas[3]
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
