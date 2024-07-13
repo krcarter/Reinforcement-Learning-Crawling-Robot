@@ -13,9 +13,14 @@
 
 # Dependencies
 
-* Pybullet
+* Pybullet (Microsoft C++ Build Tools)
 * Microsoft C++ Build Tools
+* matplotlib
+* numpy
 
-# References
+# References (Resources got inspiration from)
 
 * Kamidi, Vinay R., Wael Saab, and Pinhas Ben-Tzvi. "Design and analysis of a novel planar robotic leg for high-speed locomotion." 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2017.
+
+* Singla, Abhik, et al. "Realizing learned quadruped locomotion behaviors through kinematic motion primitives." 2019 International Conference on Robotics and Automation (ICRA). IEEE, 2019.
+

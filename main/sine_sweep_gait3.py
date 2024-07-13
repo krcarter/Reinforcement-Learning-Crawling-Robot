@@ -87,7 +87,8 @@ def crawl_walk(time):
 
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
-    frequency = 10.0       # frequency of the sine wave (ideally velocity control)
+    # frequency of the sine wave (ideally velocity control) 
+    frequency = 20.0       # Remember servos have to be able to track this frequency
 
     # Define the simulation timestep
     timestep = 1.0 / 240.0
@@ -205,7 +206,9 @@ def load_and_visualize_urdf(urdf_path):
                 bodyUniqueId = urdf_id, 
                 jointIndices = joint_index_list,
                 controlMode = p.POSITION_CONTROL,
-                targetPositions = target_position)
+                targetPositions = target_position
+                #maxVelocity=5
+                )
 
             #crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
             #print(crawlyPos,crawlyOrn)
