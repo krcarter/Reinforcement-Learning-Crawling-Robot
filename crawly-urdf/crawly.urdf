@@ -247,6 +247,7 @@
   <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
 
+
 <joint name="th_5" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>
   <parent link="L1_FL1"/>
@@ -262,7 +263,6 @@
   <axis xyz="1.0 -0.0 -0.0"/>
   <limit effort="1.18" lower="-3.14159" upper="3.14159" velocity="8.05"/>
 </joint>
-
 
 <joint name="th_7" type="revolute">
   <origin xyz="0.0 -0.1 0.0" rpy="0 0 0"/>

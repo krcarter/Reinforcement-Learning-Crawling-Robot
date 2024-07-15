@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import pybullet_envs
 import pybullet as p
 import pybullet_data
 import numpy as np
@@ -88,7 +89,7 @@ def crawl_walk(time):
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     # frequency of the sine wave (ideally velocity control) 
-    frequency = 10.0       # Remember servos have to be able to track this frequency
+    frequency = 20.0       # Remember servos have to be able to track this frequency
 
     # Define the simulation timestep
     timestep = 1.0 / 240.0
@@ -142,7 +143,7 @@ def load_and_visualize_urdf(urdf_path):
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
     # Change the camera view
-    camera_distance = 1.0  # Distance from the target position
+    camera_distance = 1.5  # Distance from the target position
     camera_yaw = 85        # Yaw angle in degrees
     camera_pitch = -35     # Pitch angle in degrees
     camera_target_position = [0, 0, 0]  # Target position [x, y, z]
@@ -213,9 +214,13 @@ def load_and_visualize_urdf(urdf_path):
             crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
             
 
+            # Change the camera view
+            camera_distance = 1.0  # Distance from the target position
+            camera_yaw = 0        # Yaw angle in degrees
+            camera_pitch = -35     # Pitch angle in degrees
+
             # Camera Tracks the robot
-            camera_yaw += .001
-            p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, crawlyPos)
+            #p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, crawlyPos)
             
             #print(crawlyPos,crawlyOrn)
             #       
