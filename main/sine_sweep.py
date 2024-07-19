@@ -97,11 +97,11 @@ def crawl_walk(time):
     back_links_L1 = Amp_b * np.sin(omega * time_points / sweep_duration + phi_b) + offset_b
     back_links_L2 = Amp_b2 * np.sin(omega * time_points / sweep_duration + phi_b2) + offset_b2
 
-    trajectories[0] = front_links_L1
-    trajectories[2] = -1 * front_links_L1
+    # trajectories[0] = front_links_L1
+    # trajectories[2] = -1 * front_links_L1
 
-    trajectories[1] = front_links_L2
-    trajectories[3] = -1 * front_links_L2
+    # trajectories[1] = front_links_L2
+    # trajectories[3] = -1 * front_links_L2
 
     # trajectories[4] = back_links_L1
     # trajectories[5] = back_links_L2

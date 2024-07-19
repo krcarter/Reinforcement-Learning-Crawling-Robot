@@ -1,0 +1,4 @@
+matplotlib
+pybullet
+numpy
+gym
