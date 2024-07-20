@@ -159,17 +159,23 @@ def load_and_visualize_urdf(urdf_path):
     p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
     # Load the URDF file
+    basePosition = [0, 0, 1]
+    baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
+
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
-    urdf_id = p.loadURDF(urdf_path, flags=flags)
+    urdf_id = p.loadURDF(urdf_path, 
+                        basePosition=basePosition,
+                        baseOrientation=baseOrientation,
+                        flags=flags)
     num_joint = p.getNumJoints(urdf_id)
     joint_index_list = list(range(num_joint))
 
     # robot_debug(urdf_id, joint_index_list) # print statements
 
     # Set the initial position and orientation of the URDF
-    initial_position = [0, 0, 1] #x,y,z
-    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy?
-    p.resetBasePositionAndOrientation(urdf_id, initial_position, initial_orientation)
+    # initial_position = [0, 0, 1] #x,y,z
+    # initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy?
+    # p.resetBasePositionAndOrientation(urdf_id, initial_position, initial_orientation)
 
     print("NumJoints: ", p.getNumJoints(urdf_id))
     initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
@@ -179,6 +185,8 @@ def load_and_visualize_urdf(urdf_path):
         p.enableJointForceTorqueSensor(urdf_id, joint, 1)
         print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
 
+    print("Get joint state: ")
+    print(p.getJointStates(urdf_id, joint_index_list))
     #Generate Trajectory
     sweep_duration = 5.0 #seconds
     trajectory = crawl_walk(sweep_duration) # 8 x n array
