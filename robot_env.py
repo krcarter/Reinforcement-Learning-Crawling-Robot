@@ -6,6 +6,7 @@ import numpy as np
 
 class RobotEnv(gym.Env):
     def __init__(self, urdf_path):
+        #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
         self.physics_client = p.connect(p.GUI)
@@ -22,7 +23,7 @@ class RobotEnv(gym.Env):
 
 
         # Load the URDF file
-        basePosition = [0, 0, 1]
+        basePosition = [0, 0, .2]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -35,10 +36,11 @@ class RobotEnv(gym.Env):
 
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
-        for joint in range(self.robot_id ):
+        for joint in range(self.num_joints):
+            #print("HI MY JOINTS ARE RESETTING")
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
-            print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
+            #print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
         self.action_space = spaces.Box(low=-1, high=1, shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.num_joints*2,), dtype=np.float32)
@@ -59,7 +61,7 @@ class RobotEnv(gym.Env):
         p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
         # Load the URDF file
-        basePosition = [0, 0, 1]
+        basePosition = [0, 0, .1]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -78,10 +80,10 @@ class RobotEnv(gym.Env):
 
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
-        for joint in range(self.robot_id ):
+        for joint in range(self.num_joints):
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
-            print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
+            #print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
 
         return self._get_observation()
@@ -104,10 +106,11 @@ class RobotEnv(gym.Env):
         # (https://github.com/bulletphysics/bullet3/blob/master/examples/pybullet/gym/pybullet_envs/robot_locomotors.py)
         # def calc_state(self):
 
-        print((self.num_joints))
-        print(self.joint_index_list)
+        #print((self.num_joints))
+        #print(self.joint_index_list)
         #print(p.getJointStates(self.robot_id, self.joint_index_list))
-        print(p.getJointStates(self.robot_id, [0,1]))
+        #print(p.getJointStates(self.robot_id, [0,1]))
+        #print("OBSERVATION")
         joint_states = p.getJointStates(self.robot_id, range(self.num_joints))
         joint_positions = [state[0] for state in joint_states]
         joint_velocities = [state[1] for state in joint_states]
@@ -139,6 +142,8 @@ class RobotEnv(gym.Env):
 
         # weights = [1]
         reward = velocity_magnitude
+        print("REWARD:", reward)
+        #reward = 0 
         return reward
 
     def _is_done(self):
