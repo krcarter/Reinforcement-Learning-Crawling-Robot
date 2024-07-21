@@ -7,7 +7,7 @@ import time
 model = PPO.load("models/ppo_robot")
 
 # Create the environment
-env = RobotEnv("urdf/crawly.urdf")
+env = RobotEnv("urdf/crawly.urdf", render = True)
 
 # Test the trained model
 obs = env.reset()

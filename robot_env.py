@@ -3,14 +3,26 @@ from gym import spaces
 import pybullet as p
 import pybullet_data
 import numpy as np
+import time
 
 class RobotEnv(gym.Env):
-    def __init__(self, urdf_path):
+    def __init__(self, urdf_path, render = False):
         #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
         self.physics_client = p.connect(p.GUI)
         #self.physics_client = p.connect(p.DIRECT) 
+
+        self._is_render = render
+        self._last_frame_time = 0.0
+        self._time_step = 0.01
+
+        # Change the camera view
+        self.camera_distance = 1.0  # Distance from the target position
+        self.camera_yaw = 85        # Yaw angle in degrees
+        self.camera_pitch = -35     # Pitch angle in degrees
+        self.camera_target_position = [0, 0, 0]  # Target position [x, y, z]
+
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
 
@@ -32,6 +44,8 @@ class RobotEnv(gym.Env):
                             baseOrientation=baseOrientation,
                             flags=flags)
         
+        self._last_base_position = [0, 0, 0]
+        self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id)
         self.num_joints = p.getNumJoints(self.robot_id)
         self.joint_index_list = list(range(self.num_joints))
 
@@ -46,8 +60,8 @@ class RobotEnv(gym.Env):
         print("ACTION SPACE SIZE: ", (self.num_joints,))
         print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
-        action_low = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi, 0, 0, 0, 0])
-        action_high =  np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4, 0 , 0, 0, 0])
+        action_low = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi, np.pi/2, 0, -np.pi/2, 0])
+        action_high =  np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4, np.pi/2, 0, -np.pi/2, 0])
         self.action_space = spaces.Box(action_low, action_high, shape=(self.num_joints,), dtype=np.float32)
         #self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
@@ -66,6 +80,7 @@ class RobotEnv(gym.Env):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         # Create a plane for the URDF to stand on
         plane_id = p.loadURDF("plane.urdf")
+        p.changeVisualShape(plane_id, -1, rgbaColor=[1, 1, 1, 0.9])
          #Set Friction Properties of Ground Plan
         p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
@@ -77,6 +92,8 @@ class RobotEnv(gym.Env):
                             basePosition=basePosition,
                             baseOrientation=baseOrientation,
                             flags=flags)
+        
+        self._last_base_position = [0, 0, 0]
         #num_joint = p.getNumJoints(urdf_id)
 
         # Set the initial position and orientation of the base link from URDF
@@ -103,6 +120,38 @@ class RobotEnv(gym.Env):
         # ToDo need to use setJointMotorControlArray instead
         #print("ACTION: ", action)
         #scaled_action = action * np.pi  # Scale action to a reasonable range
+
+        if self._is_render:
+            # Sleep, otherwise the computation takes less time than real time,
+            # which will make the visualization like a fast-forward video.
+            time_spent = time.time() - self._last_frame_time
+            self._last_frame_time = time.time()
+            self._action_repeat = 1
+            time_to_sleep = self._action_repeat * self._time_step - time_spent
+            if time_to_sleep > 0:
+                time.sleep(time_to_sleep)
+            # base_pos = self.minitaur.GetBasePosition()
+            # camInfo = self._pybullet_client.getDebugVisualizerCamera()
+            # curTargetPos = camInfo[11]
+            # distance = camInfo[10]
+            # yaw = camInfo[8]
+            # pitch = camInfo[9]
+            # targetPos = [
+            #     0.95 * curTargetPos[0] + 0.05 * base_pos[0], 0.95 * curTargetPos[1] + 0.05 * base_pos[1],
+            #     curTargetPos[2]
+            # ]
+
+            # self._pybullet_client.resetDebugVisualizerCamera(distance, yaw, pitch, base_pos)
+        
+        #   Camera
+
+        # Camera Tracks the robot
+        self.camera_yaw += .001
+        self.camera_target_position  = self.base_position
+        p.resetDebugVisualizerCamera(self.camera_distance, self.camera_yaw, self.camera_pitch, self.camera_target_position )
+
+
+        # Commands
         for i in range(self.num_joints):
             p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, targetPosition=action[i])
         
@@ -131,10 +180,10 @@ class RobotEnv(gym.Env):
         joint_positions = [state[0] for state in joint_states]
         joint_velocities = [state[1] for state in joint_states]
 
-        base_position, base_orientation = p.getBasePositionAndOrientation(self.robot_id)
-        base_linear_velocity, base_angular_velocity = p.getBaseVelocity(self.robot_id)
+        self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id)
+        self.base_linear_velocity, self.base_angular_velocity = p.getBaseVelocity(self.robot_id)
     
-        observation = np.concatenate([joint_positions, joint_velocities, base_position, base_orientation, base_linear_velocity, base_angular_velocity])
+        observation = np.concatenate([joint_positions, joint_velocities, self.base_position, self.base_orientation, self.base_linear_velocity, self.base_angular_velocity])
         # ToDo 
         # Check if joints are at their limitis
         # Get angle of the robot in comparison of the target
@@ -144,11 +193,35 @@ class RobotEnv(gym.Env):
         #return np.array(joint_positions + joint_velocities)
 
     def _compute_reward(self):
+
+        self._distance_weight = 1.0
+        self._energy_weight = 0.005
+        self._shake_weight = 0.005
+        self._drift_weight = 0.005
+    
         # Get the linear velocity of the base link of the robot
         linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
         # Calculate the magnitude (absolute value) of the linear velocity
         velocity_magnitude = np.linalg.norm(linear_velocity)
         # The reward is the magnitude of the base link's velocity
+
+        self.current_base_position, self.current_base_orientation = p.getBasePositionAndOrientation(self.robot_id)
+
+        forward_reward = self.current_base_position[0] - self._last_base_position[0]
+        drift_reward = -abs(self.current_base_position[1] - self._last_base_position[1])
+        shake_reward = -abs(self.current_base_position[2] - self._last_base_position[2])
+
+        # print('Reward')
+        # print(forward_reward, drift_reward, shake_reward)
+        # print(type(forward_reward),type(drift_reward),type(shake_reward))
+
+        self._last_base_position = self.current_base_position
+
+        joint_states = p.getJointStates(self.robot_id, range(self.num_joints))
+        joint_torques = [state[3] for state in joint_states]
+        joint_motor_velocities = [state[1] for state in joint_states]
+        
+        energy_reward = np.dot(joint_torques, joint_motor_velocities)  * self._time_step # Negative to penalize energy consumption
 
         # ToDo
         # Positive Reward for walking to target (some object very far away)
@@ -161,15 +234,19 @@ class RobotEnv(gym.Env):
 
         # weights = [1]
         # reward =  - velocity_magnitude 
-        # Penalize falling
+        # Penalize falling 
         fall_weight = -10
         fall_penalty = fall_weight if self._check_fall() else 0
 
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
+        
+        reward = (self._distance_weight * forward_reward - self._energy_weight * energy_reward +
+              self._drift_weight * drift_reward + self._shake_weight * shake_reward)
 
-        reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
-        #print("REWARD:", reward)
+
+        #reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
+        print("REWARD:", reward)
         #reward = 0 
         return reward
 
@@ -184,7 +261,7 @@ class RobotEnv(gym.Env):
         orientation = p.getBasePositionAndOrientation(self.robot_id)[1]
         roll, pitch, yaw = p.getEulerFromQuaternion(orientation)
 
-        #print("RPY: ", roll, pitch, yaw)
+        # print("RPY: ", roll, pitch, yaw)
         
         # Check if the robot has fallen over (adjust the threshold as needed)
         # fallen when 0 > roll > pi or -pi/2 < pitch > pi/2 
