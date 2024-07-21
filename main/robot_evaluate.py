@@ -11,7 +11,7 @@ env = RobotEnv("urdf/crawly.urdf")
 
 # Test the trained model
 obs = env.reset()
-for _ in range(1000):
+for _ in range(10000):
     #time.sleep(2)
     action, _states = model.predict(obs)
     obs, rewards, dones, info = env.step(action)

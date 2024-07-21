@@ -9,8 +9,8 @@ class RobotEnv(gym.Env):
         #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
-        #self.physics_client = p.connect(p.GUI)
-        self.physics_client = p.connect(p.DIRECT)
+        self.physics_client = p.connect(p.GUI)
+        #self.physics_client = p.connect(p.DIRECT) 
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
 
@@ -46,7 +46,10 @@ class RobotEnv(gym.Env):
         print("ACTION SPACE SIZE: ", (self.num_joints,))
         print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
-        self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
+        action_low = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi, 0, 0, 0, 0])
+        action_high =  np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4, 0 , 0, 0, 0])
+        self.action_space = spaces.Box(action_low, action_high, shape=(self.num_joints,), dtype=np.float32)
+        #self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
         self.current_step = 0  # Initialize the step counter

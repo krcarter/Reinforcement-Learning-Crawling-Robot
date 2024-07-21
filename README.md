@@ -14,9 +14,13 @@
 # Dependencies
 
 * Pybullet (Microsoft C++ Build Tools)
-* Microsoft C++ Build Tools
+* Microsoft C++ Build Tools (If running on windows)
 * matplotlib
 * numpy
+* gym==0.23.1
+* tensorflow
+* stable-baselines3
+* shimmy == 0.2.1
 
 # References (Resources got inspiration from)
 
@@ -24,3 +28,6 @@
 
 * Singla, Abhik, et al. "Realizing learned quadruped locomotion behaviors through kinematic motion primitives." 2019 International Conference on Robotics and Automation (ICRA). IEEE, 2019.
 
+* Tan, Jie, et al. "Sim-to-real: Learning agile locomotion for quadruped robots." arXiv preprint arXiv:1804.10332 (2018).
+
+* Rudin, Nikita, et al. "Learning to walk in minutes using massively parallel deep reinforcement learning." Conference on Robot Learning. PMLR, 2022.
