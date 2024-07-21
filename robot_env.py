@@ -9,7 +9,8 @@ class RobotEnv(gym.Env):
         #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
-        self.physics_client = p.connect(p.GUI)
+        #self.physics_client = p.connect(p.GUI)
+        self.physics_client = p.connect(p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
 
@@ -23,7 +24,7 @@ class RobotEnv(gym.Env):
 
 
         # Load the URDF file
-        basePosition = [0, 0, .3]
+        basePosition = [0, 0,.2]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -41,9 +42,14 @@ class RobotEnv(gym.Env):
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
             print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
+        
+        print("ACTION SPACE SIZE: ", (self.num_joints,))
+        print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
+        obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
+        self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
 
-        self.action_space = spaces.Box(low=-1, high=1, shape=(self.num_joints,), dtype=np.float32)
-        self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.num_joints*2,), dtype=np.float32)
+        self.current_step = 0  # Initialize the step counter
 
     def reset(self):
         # Reset Function Example:
@@ -61,7 +67,7 @@ class RobotEnv(gym.Env):
         p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
         # Load the URDF file
-        basePosition = [0, 0, .3]
+        basePosition = [0, 0, .2]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -86,11 +92,14 @@ class RobotEnv(gym.Env):
             # print("HI MY JOINTS ARE RESETTING")
             # print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
+        self.current_step = 0  # Reset the step counter at the beginning of each episode
 
         return self._get_observation()
 
     def step(self, action):
         # ToDo need to use setJointMotorControlArray instead
+        #print("ACTION: ", action)
+        #scaled_action = action * np.pi  # Scale action to a reasonable range
         for i in range(self.num_joints):
             p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, targetPosition=action[i])
         
@@ -98,8 +107,10 @@ class RobotEnv(gym.Env):
         
         obs = self._get_observation()
         reward = self._compute_reward()
-        print("Fall Check: ", self._check_fall())
+        #print("Fall Check: ", self._check_fall())
         done = self._is_done() or self._check_fall()
+
+        self.current_step += 1  # Increment the step counter
         
         return obs, reward, done, {}
 
@@ -120,14 +131,14 @@ class RobotEnv(gym.Env):
         base_position, base_orientation = p.getBasePositionAndOrientation(self.robot_id)
         base_linear_velocity, base_angular_velocity = p.getBaseVelocity(self.robot_id)
     
-        #observation = np.concatenate([joint_positions, joint_velocities, base_position, base_orientation, base_linear_velocity, base_angular_velocity])
+        observation = np.concatenate([joint_positions, joint_velocities, base_position, base_orientation, base_linear_velocity, base_angular_velocity])
         # ToDo 
         # Check if joints are at their limitis
         # Get angle of the robot in comparison of the target
         # Get difference of the robot compared to target
 
-        #return observation
-        return np.array(joint_positions + joint_velocities)
+        return observation
+        #return np.array(joint_positions + joint_velocities)
 
     def _compute_reward(self):
         # Get the linear velocity of the base link of the robot
@@ -148,13 +159,14 @@ class RobotEnv(gym.Env):
         # weights = [1]
         # reward =  - velocity_magnitude 
         # Penalize falling
-        fall_penalty = -1 if self._check_fall() else 0
+        fall_weight = -10
+        fall_penalty = fall_weight if self._check_fall() else 0
 
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
 
         reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
-        print("REWARD:", reward)
+        #print("REWARD:", reward)
         #reward = 0 
         return reward
 
@@ -169,11 +181,12 @@ class RobotEnv(gym.Env):
         orientation = p.getBasePositionAndOrientation(self.robot_id)[1]
         roll, pitch, yaw = p.getEulerFromQuaternion(orientation)
 
-        # print("RPY: ", roll, pitch, yaw)
+        #print("RPY: ", roll, pitch, yaw)
         
         # Check if the robot has fallen over (adjust the threshold as needed)
         # fallen when 0 > roll > pi or -pi/2 < pitch > pi/2 
-        if (np.pi/12) > roll or roll > ((11/12)*np.pi) or (-5/12)*np.pi > pitch  or pitch > (5/12)*np.pi:
+        # if (np.pi/12) > roll or roll > ((11/12)*np.pi) or (-5/12)*np.pi > pitch  or pitch > (5/12)*np.pi:
+        if roll < -np.pi/2 or roll > (3/2)*np.pi or pitch < -(1/2)*np.pi  or pitch > (1/2)*np.pi:
             return True
         return False
 

@@ -10,7 +10,8 @@ env = make_vec_env(lambda: RobotEnv("urdf/crawly.urdf"), n_envs=1)
 model = PPO('MlpPolicy', env, verbose=1)
 
 # Train the model
-model.learn(total_timesteps=200000)
+#model.learn(total_timesteps=1000)
+model.learn(total_timesteps=1000000)
 
 # Save the model
 model.save("ppo_robot")
