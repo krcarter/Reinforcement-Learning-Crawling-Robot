@@ -118,10 +118,10 @@ def crawl_walk(time):
         thetas[joint] =  Amp_i * np.sin(omega * time_points / sweep_duration + phi_i) + Amp0_i #Asin(2*pi*f*t) + Ao
 
 
-    trajectories[0] = thetas[0]
-    trajectories[1] = thetas[1]
-    trajectories[2] = thetas[2]
-    trajectories[3] = thetas[3]
+    # trajectories[0] = thetas[0]
+    # trajectories[1] = thetas[1]
+    # trajectories[2] = thetas[2]
+    # trajectories[3] = thetas[3]
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
@@ -159,7 +159,7 @@ def load_and_visualize_urdf(urdf_path):
     p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
     # Load the URDF file
-    basePosition = [0, 0, 1]
+    basePosition = [0, 0, .3]
     baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT

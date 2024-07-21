@@ -23,7 +23,7 @@ class RobotEnv(gym.Env):
 
 
         # Load the URDF file
-        basePosition = [0, 0, .2]
+        basePosition = [0, 0, .3]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -37,10 +37,10 @@ class RobotEnv(gym.Env):
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
         for joint in range(self.num_joints):
-            #print("HI MY JOINTS ARE RESETTING")
+            print("HI MY JOINTS ARE RESETTING")
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
-            #print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
+            print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
         self.action_space = spaces.Box(low=-1, high=1, shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(self.num_joints*2,), dtype=np.float32)
@@ -61,7 +61,7 @@ class RobotEnv(gym.Env):
         p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
         # Load the URDF file
-        basePosition = [0, 0, .1]
+        basePosition = [0, 0, .3]
         baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
@@ -83,7 +83,8 @@ class RobotEnv(gym.Env):
         for joint in range(self.num_joints):
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
-            #print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
+            # print("HI MY JOINTS ARE RESETTING")
+            # print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
 
         return self._get_observation()
@@ -97,7 +98,8 @@ class RobotEnv(gym.Env):
         
         obs = self._get_observation()
         reward = self._compute_reward()
-        done = self._is_done()
+        print("Fall Check: ", self._check_fall())
+        done = self._is_done() or self._check_fall()
         
         return obs, reward, done, {}
 
@@ -115,18 +117,21 @@ class RobotEnv(gym.Env):
         joint_positions = [state[0] for state in joint_states]
         joint_velocities = [state[1] for state in joint_states]
 
+        base_position, base_orientation = p.getBasePositionAndOrientation(self.robot_id)
+        base_linear_velocity, base_angular_velocity = p.getBaseVelocity(self.robot_id)
+    
+        #observation = np.concatenate([joint_positions, joint_velocities, base_position, base_orientation, base_linear_velocity, base_angular_velocity])
         # ToDo 
         # Check if joints are at their limitis
-        # Get body pose (position and orientation relative to world frame)
         # Get angle of the robot in comparison of the target
         # Get difference of the robot compared to target
-        # Get robot body angular rotation
 
+        #return observation
         return np.array(joint_positions + joint_velocities)
 
     def _compute_reward(self):
         # Get the linear velocity of the base link of the robot
-        linear_velocity, _ = p.getBaseVelocity(self.robot_id)
+        linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
         # Calculate the magnitude (absolute value) of the linear velocity
         velocity_magnitude = np.linalg.norm(linear_velocity)
         # The reward is the magnitude of the base link's velocity
@@ -141,7 +146,14 @@ class RobotEnv(gym.Env):
 
 
         # weights = [1]
-        reward = velocity_magnitude
+        # reward =  - velocity_magnitude 
+        # Penalize falling
+        fall_penalty = -1 if self._check_fall() else 0
+
+        # Penalize high angular velocities
+        angular_penalty = -np.linalg.norm(angular_velocity)
+
+        reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
         print("REWARD:", reward)
         #reward = 0 
         return reward
@@ -151,6 +163,20 @@ class RobotEnv(gym.Env):
         # Orientation check on its side or back
         done = False
         return done
+    
+    def _check_fall(self):
+        # Get the orientation of the base of the robot
+        orientation = p.getBasePositionAndOrientation(self.robot_id)[1]
+        roll, pitch, yaw = p.getEulerFromQuaternion(orientation)
+
+        # print("RPY: ", roll, pitch, yaw)
+        
+        # Check if the robot has fallen over (adjust the threshold as needed)
+        # fallen when 0 > roll > pi or -pi/2 < pitch > pi/2 
+        if (np.pi/12) > roll or roll > ((11/12)*np.pi) or (-5/12)*np.pi > pitch  or pitch > (5/12)*np.pi:
+            return True
+        return False
+
 
     def render(self, mode='human'):
         pass
