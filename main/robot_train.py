@@ -4,7 +4,7 @@ from pybullet_envs.robot_env import RobotEnv
 
 
 # Create the vectorized environment
-env = make_vec_env(lambda: RobotEnv("urdf/crawly.urdf"), n_envs=1)
+env = make_vec_env(lambda: RobotEnv("urdf/crawly.urdf", show_training = False), n_envs=1)
 
 # Create the PPO model
 model = PPO('MlpPolicy', env, verbose=1)
@@ -13,8 +13,8 @@ model = PPO('MlpPolicy', env, verbose=1)
 
 # Train the model
 #model.learn(total_timesteps = 10_000)
-model.learn(total_timesteps = 1_000_000)
-#model.learn(total_timesteps=10_000_000)
+#model.learn(total_timesteps = 1_000_000)
+model.learn(total_timesteps=10_000_000)
 
 # Save the model
 model.save("ppo_robot")
