@@ -12,6 +12,7 @@ model = PPO('MlpPolicy', env, verbose=1)
 
 
 # Train the model
+#model.learn(total_timesteps = 10_000)
 model.learn(total_timesteps = 1_000_000)
 #model.learn(total_timesteps=10_000_000)
 

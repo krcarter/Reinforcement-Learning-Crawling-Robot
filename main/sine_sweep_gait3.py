@@ -160,7 +160,7 @@ def load_and_visualize_urdf(urdf_path):
 
     # Load the URDF file
     basePosition = [0, 0, .3]
-    baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
+    baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
     urdf_id = p.loadURDF(urdf_path, 

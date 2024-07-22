@@ -6,16 +6,21 @@ import numpy as np
 import time
 
 class RobotEnv(gym.Env):
-    def __init__(self, urdf_path, render = False):
+    def __init__(self, urdf_path, render = False, show_training = True):
         #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
-        self.physics_client = p.connect(p.GUI)
-        #self.physics_client = p.connect(p.DIRECT) 
 
+        self._num_bullet_solver_iterations = 300
         self._is_render = render
         self._last_frame_time = 0.0
         self._time_step = 0.01
+
+        if show_training == True or self.render==True:
+            self.physics_client = p.connect(p.GUI)
+        else:
+            self.physics_client = p.connect(p.DIRECT) 
+
 
         # Change the camera view
         self.camera_distance = 1.0  # Distance from the target position
@@ -26,6 +31,9 @@ class RobotEnv(gym.Env):
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
 
+        p.setPhysicsEngineParameter(
+          numSolverIterations=int(self._num_bullet_solver_iterations))
+        p.setTimeStep(self._time_step)
 
         # Set the path to PyBullet's data directory
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -34,10 +42,11 @@ class RobotEnv(gym.Env):
          #Set Friction Properties of Ground Plan
         p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
+        #self.reset()
 
         # Load the URDF file
         basePosition = [0, 0,.2]
-        baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
+        baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
                             basePosition=basePosition,
@@ -60,8 +69,8 @@ class RobotEnv(gym.Env):
         print("ACTION SPACE SIZE: ", (self.num_joints,))
         print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
-        action_low = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi, np.pi/2, 0, -np.pi/2, 0])
-        action_high =  np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4, np.pi/2, 0, -np.pi/2, 0])
+        action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
+        action_high = np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4,  np.pi/4, (7/12)*np.pi, np.pi/6, -np.pi/4])
         self.action_space = spaces.Box(action_low, action_high, shape=(self.num_joints,), dtype=np.float32)
         #self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
@@ -75,6 +84,11 @@ class RobotEnv(gym.Env):
         # def reset
         p.resetSimulation()
         p.setGravity(0, 0, -9.8)
+
+
+        p.setPhysicsEngineParameter(
+          numSolverIterations=int(self._num_bullet_solver_iterations))
+        p.setTimeStep(self._time_step)
         
         # Set the path to PyBullet's data directory
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -86,7 +100,7 @@ class RobotEnv(gym.Env):
 
         # Load the URDF file
         basePosition = [0, 0, .2]
-        baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) 
+        baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
         flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
         self.robot_id = p.loadURDF(self.urdf_path,
                             basePosition=basePosition,
@@ -130,18 +144,6 @@ class RobotEnv(gym.Env):
             time_to_sleep = self._action_repeat * self._time_step - time_spent
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
-            # base_pos = self.minitaur.GetBasePosition()
-            # camInfo = self._pybullet_client.getDebugVisualizerCamera()
-            # curTargetPos = camInfo[11]
-            # distance = camInfo[10]
-            # yaw = camInfo[8]
-            # pitch = camInfo[9]
-            # targetPos = [
-            #     0.95 * curTargetPos[0] + 0.05 * base_pos[0], 0.95 * curTargetPos[1] + 0.05 * base_pos[1],
-            #     curTargetPos[2]
-            # ]
-
-            # self._pybullet_client.resetDebugVisualizerCamera(distance, yaw, pitch, base_pos)
         
         #   Camera
 
@@ -198,6 +200,7 @@ class RobotEnv(gym.Env):
         self._energy_weight = 0.005
         self._shake_weight = 0.005
         self._drift_weight = 0.005
+        self._velocity_weight = 0.1
     
         # Get the linear velocity of the base link of the robot
         linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
@@ -240,13 +243,18 @@ class RobotEnv(gym.Env):
 
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
-        
-        reward = (self._distance_weight * forward_reward - self._energy_weight * energy_reward +
+
+        #No distance weight
+
+        reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward +
               self._drift_weight * drift_reward + self._shake_weight * shake_reward)
+        
+        # reward = (self._velocity_weight*velocity_magnitude + self._distance_weight * forward_reward - self._energy_weight * energy_reward +
+        #       self._drift_weight * drift_reward + self._shake_weight * shake_reward)
 
 
         #reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
-        print("REWARD:", reward)
+        #print("REWARD:", reward)
         #reward = 0 
         return reward
 
