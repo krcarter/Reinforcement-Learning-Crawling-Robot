@@ -54,6 +54,7 @@ class RobotEnv(gym.Env):
                             flags=flags)
         
         self._last_base_position = [0, 0, 0]
+        self._last_base_orientation = [0, 0, 0]
         self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id)
         self.num_joints = p.getNumJoints(self.robot_id)
         self.joint_index_list = list(range(self.num_joints))
@@ -69,8 +70,15 @@ class RobotEnv(gym.Env):
         print("ACTION SPACE SIZE: ", (self.num_joints,))
         print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
-        action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
-        action_high = np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4,  np.pi/4, (7/12)*np.pi, np.pi/6, -np.pi/4])
+
+        # Crawl Gait 1
+        action_low  = np.array([-60,   0,-60,   0, 90, 15, -90, -15]) * np.pi/180
+        action_high = np.array([ 60, 120, 60, 120, 90, 15, -90, -15]) * np.pi/180
+
+        # Bound Gait 1
+        # action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
+        # action_high = np.array([0, (7/12)*np.pi, np.pi/6, -np.pi/4,  np.pi/4, (7/12)*np.pi, np.pi/6, -np.pi/4])
+
         self.action_space = spaces.Box(action_low, action_high, shape=(self.num_joints,), dtype=np.float32)
         #self.action_space = spaces.Box(low=-np.pi, high=np.pi,  shape=(self.num_joints,), dtype=np.float32)
         self.observation_space = spaces.Box(low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32)
@@ -108,6 +116,7 @@ class RobotEnv(gym.Env):
                             flags=flags)
         
         self._last_base_position = [0, 0, 0]
+        self._last_base_orientation = [0, 0, 0]
         #num_joint = p.getNumJoints(urdf_id)
 
         # Set the initial position and orientation of the base link from URDF
@@ -205,14 +214,18 @@ class RobotEnv(gym.Env):
         # Get the linear velocity of the base link of the robot
         linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
         # Calculate the magnitude (absolute value) of the linear velocity
-        velocity_magnitude = np.linalg.norm(linear_velocity)
+
+        # velocity_magnitude = np.linalg.norm(linear_velocity) # for bounding gait I used the x,y,z components of velocity
+    
+        velocity_magnitude = np.linalg.norm(linear_velocity[:2]) # Use only x and y components of the linear velocity
+        #
         # The reward is the magnitude of the base link's velocity
 
         self.current_base_position, self.current_base_orientation = p.getBasePositionAndOrientation(self.robot_id)
 
         forward_reward = self.current_base_position[0] - self._last_base_position[0]
-        drift_reward = -abs(self.current_base_position[1] - self._last_base_position[1])
-        shake_reward = -abs(self.current_base_position[2] - self._last_base_position[2])
+        drift_reward = -abs(self.current_base_position[1] - self._last_base_position[1]) # negative to reduce drift
+        shake_reward = -abs(self.current_base_position[2] - self._last_base_position[2]) # negative to reduce shaking
 
         # print('Reward')
         # print(forward_reward, drift_reward, shake_reward)
@@ -224,7 +237,7 @@ class RobotEnv(gym.Env):
         joint_torques = [state[3] for state in joint_states]
         joint_motor_velocities = [state[1] for state in joint_states]
         
-        energy_reward = np.dot(joint_torques, joint_motor_velocities)  * self._time_step # Negative to penalize energy consumption
+        energy_reward = abs(np.dot(joint_torques, joint_motor_velocities))  * self._time_step # Negative to penalize energy consumption
 
         # ToDo
         # Positive Reward for walking to target (some object very far away)
@@ -238,17 +251,22 @@ class RobotEnv(gym.Env):
         # weights = [1]
         # reward =  - velocity_magnitude 
         # Penalize falling 
-        fall_weight = -10
+        fall_weight = -1
         fall_penalty = fall_weight if self._check_fall() else 0
 
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
 
-        #No distance weight
+        # Crawling
 
-        reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward +
-              self._drift_weight * drift_reward + self._shake_weight * shake_reward)
+        reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward + self._shake_weight * shake_reward + fall_penalty)
+
+        #No distance weight - Bounding
+
+        # reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward +
+        #       self._drift_weight * drift_reward + self._shake_weight * shake_reward)
         
+        # Distance weights
         # reward = (self._velocity_weight*velocity_magnitude + self._distance_weight * forward_reward - self._energy_weight * energy_reward +
         #       self._drift_weight * drift_reward + self._shake_weight * shake_reward)
 

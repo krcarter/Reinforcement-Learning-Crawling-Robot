@@ -118,10 +118,10 @@ def crawl_walk(time):
         thetas[joint] =  Amp_i * np.sin(omega * time_points / sweep_duration + phi_i) + Amp0_i #Asin(2*pi*f*t) + Ao
 
 
-    # trajectories[0] = thetas[0]
-    # trajectories[1] = thetas[1]
-    # trajectories[2] = thetas[2]
-    # trajectories[3] = thetas[3]
+    trajectories[0] = thetas[0]
+    trajectories[1] = thetas[1]
+    trajectories[2] = thetas[2]
+    trajectories[3] = thetas[3]
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
