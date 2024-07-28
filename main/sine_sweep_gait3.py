@@ -105,7 +105,7 @@ def crawl_walk(time):
     omega = 2 * np.pi * frequency
 
     Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
-    phi  = [np.pi/4, np.pi/4, np.pi/4, np.pi/4, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
     Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi/2, 0, 0, 0, 0]
     thetas = np.tile(intiial_position, (num_steps, 1)).T
 
@@ -163,6 +163,7 @@ def load_and_visualize_urdf(urdf_path):
     baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
+    print("URDF PATH:", urdf_path)
     urdf_id = p.loadURDF(urdf_path, 
                         basePosition=basePosition,
                         baseOrientation=baseOrientation,

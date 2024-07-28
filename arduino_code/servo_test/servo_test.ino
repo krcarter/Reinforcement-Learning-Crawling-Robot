@@ -26,7 +26,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
 #define SERVO_FREQ 100 // Digital servos run at ~100 Hz updates
 
-#define servoChannel 0
+#define servoChannel 7
 
 // our servo # counter
 uint8_t servonum = 0;
