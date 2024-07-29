@@ -11,64 +11,49 @@
 
 // called this way, it uses the default address 0x40
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-// you can also call it with a different address you want
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);
-// you can also call it with a different address and I2C interface
-//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);
 
-// Depending on your servo make, the pulse width min and max may vary, you 
-// want these to be as small/large as possible without hitting the hard stop
-// for max range. You'll have to tweak them as necessary to match the servos you
-// have!
-#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX  1100 // This is the 'maximum' pulse length count (out of 4096)
-#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
-#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
-#define SERVO_FREQ 100 // Digital servos run at ~100 Hz updates
+#define SERVOMIN  100 // This is the 'minimum' pulse length count (out of 4096)
+#define SERVOMAX  505 // This is the 'maximum' pulse length count (out of 4096)
+#define SERVO_FREQ 50 // MF95 update rate of 50
+const int updateInterval = 20; // Update interval in milliseconds
 
 #define servoChannel 0
 
 // our servo # counter
 // uint8_t servonum = 0;
 
-const int numServos = 8; // Number of servos
+const int numServos = 4; // Number of servos
 
 const float pi = 3.14159265358979323846;
-const float frequency = 1.0; // Frequency in Hz
-const int updateInterval = 20; // Update interval in milliseconds
+const float frequency = 2.0; // Frequency in Hz
 
-float amplitude[numServos] = {15.0, 30.0, 0, 0, 0, 0, 0, 0}; // Amplitude in degrees
-float phaseShift[numServos] ={0 ,  pi/2.0,  0,  0, 0, 0, 0, 0}; // Phase shift in radians
-float verticalShift[numServos] = {-15.0, 75.0, 0, 0, 0, 0, 0, 0}; // Vertical shift in degrees
+float amplitude[numServos] =     { 15.0, 30.0  , 15.0, 30.0}; // Amplitude in degrees
+float phaseShift[numServos] =    {    0, pi/2.0,    0, pi/2.0}; // Phase shift in radians
+float verticalShift[numServos] = {-15.0, 75.0  , 15.0, 75.0}; // Vertical shift in degrees
 
 float simulationShift = 90.0;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("8 channel Servo test!");
+  Serial.println("Simple Gait Trajectory");
 
   pwm.begin();
-  /*
-   * In theory the internal oscillator (clock) is 25MHz but it really isn't
-   * that precise. You can 'calibrate' this by tweaking this number until
-   * you get the PWM update frequency you're expecting!
-   * The int.osc. for the PCA9685 chip is a range between about 23-27MHz and
-   * is used for calculating things like writeMicroseconds()
-   * Analog servos run at ~50 Hz updates, It is importaint to use an
-   * oscilloscope in setting the int.osc frequency for the I2C PCA9685 chip.
-   * 1) Attach the oscilloscope to one of the PWM signal pins and ground on
-   *    the I2C PCA9685 chip you are setting the value for.
-   * 2) Adjust setOscillatorFrequency() until the PWM update frequency is the
-   *    expected value (50Hz for most ESCs)
-   * Setting the value here is specific to each individual I2C PCA9685 chip and
-   * affects the calculations for the PWM update frequency. 
-   * Failure to correctly set the int.osc value will cause unexpected PWM results
-   */
-  pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
 
   delay(10);
 
+  // HACKY but wanted get this up and running quick
+  // Set Back legs intials conditions
+
+  int J4 = map(15, 0, 180, SERVOMIN, SERVOMAX);
+  int J5 = map(20, 0, 180, SERVOMIN, SERVOMAX);
+  int J6 = map(150, 0, 180, SERVOMIN, SERVOMAX);
+  int J7 = map(160, 0, 180, SERVOMIN, SERVOMAX);
+
+  pwm.setPWM(4, 0, J4);
+  pwm.setPWM(5, 0, J5);
+  pwm.setPWM(6, 0, J6);
+  pwm.setPWM(7, 0, J7);
 }
 
 void loop() {
@@ -99,19 +84,14 @@ void loop() {
     }
   }
 
-  // Set Back legs intials conditions
-
-  pulseLengths[4] = map(15, 0, 180, SERVOMIN, SERVOMAX);
-  pulseLengths[5] = map(20, 0, 180, SERVOMIN, SERVOMAX);
-  pulseLengths[6] = map(150, 0, 180, SERVOMIN, SERVOMAX);
-  pulseLengths[7] = map(160, 0, 180, SERVOMIN, SERVOMAX);
-
 
   // Then, set the pulse lengths for all servos
   for (int i = 0; i < numServos; i++) {
-    //Serial.println(pulseLengths[i]);
+    Serial.print("Index: ");
+    Serial.print(i);
+    Serial.println(pulseLengths[i]);
     pwm.setPWM(i, 0, pulseLengths[i]);
   }
 
-  //delay(updateInterval); // Wait for next update
+  delay(updateInterval); // Wait for next update
 }
