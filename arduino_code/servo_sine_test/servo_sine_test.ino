@@ -15,6 +15,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMIN  100 // This is the 'minimum' pulse length count (out of 4096)
 #define SERVOMAX  505 // This is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50 // Digital servos run at ~100 Hz updates
+unsigned long previousMillis = 0;
 const int updateInterval = 20; // Update interval in milliseconds
 
 #define servoChannel 0
@@ -37,17 +38,24 @@ void setup() {
 }
 
 void loop() {
-  unsigned long currentTime = millis();
-  float amplitude = 20.0;
-  float angle = amplitude * sin(2 * pi * frequency * currentTime / 1000.0) + 90.0; // Sine wave centered at 90 degrees
-  int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+//delay(updateInterval); // Wait for next update
 
-  //pwm.setPWM(servoChannel, 0, pulseLength);
-  pwm.setPWM(servoChannel, 0, pulseLength);
-  pwm.setPWM(2, 0, pulseLength);
-  //pwm.setPWM(4, 0, pulseLength);
-  //pwm.setPWM(6, 0, pulseLength);
-  
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= updateInterval) {
+    previousMillis = currentMillis;
 
-  delay(updateInterval); // Wait for next update
+    float currentTime = currentMillis;
+
+    float amplitude = 10.0;
+    float angle = amplitude * sin(2 * pi * frequency * currentTime / 1000.0) + 90.0; // Sine wave centered at 90 degrees
+    int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
+
+    //pwm.setPWM(servoChannel, 0, pulseLength);
+    pwm.setPWM(servoChannel, 0, pulseLength);
+    pwm.setPWM(2, 0, pulseLength);
+    pwm.setPWM(4, 0, pulseLength);
+    pwm.setPWM(6, 0, pulseLength);
+      
+    // Your servo command code here
+  }
 }

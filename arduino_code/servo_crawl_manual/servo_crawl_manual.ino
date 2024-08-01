@@ -45,10 +45,10 @@ void setup() {
   // HACKY but wanted get this up and running quick
   // Set Back legs intials conditions
 
-  int J4 = map(15, 0, 180, SERVOMIN, SERVOMAX);
-  int J5 = map(20, 0, 180, SERVOMIN, SERVOMAX);
-  int J6 = map(150, 0, 180, SERVOMIN, SERVOMAX);
-  int J7 = map(160, 0, 180, SERVOMIN, SERVOMAX);
+  int J4 = map(10, 0, 180, SERVOMIN, SERVOMAX);
+  int J5 = map(10, 0, 180, SERVOMIN, SERVOMAX);
+  int J6 = map(175, 0, 180, SERVOMIN, SERVOMAX);
+  int J7 = map(175, 0, 180, SERVOMIN, SERVOMAX);
 
   pwm.setPWM(4, 0, J4);
   pwm.setPWM(5, 0, J5);
