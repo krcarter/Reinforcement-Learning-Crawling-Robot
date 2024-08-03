@@ -38,8 +38,6 @@ void setup() {
 }
 
 void loop() {
-//delay(updateInterval); // Wait for next update
-
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= updateInterval) {
     previousMillis = currentMillis;
