@@ -88,10 +88,10 @@ def crawl_walk(time):
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     # frequency of the sine wave (ideally velocity control) 
-    frequency = 1.0       # Remember servos have to be able to track this frequency
+    frequency = 10.0       # Remember servos have to be able to track this frequency
 
     # Define the simulation timestep
-    timestep = 10.0 / 240.0
+    timestep = 1.0 / 240.0
 
     # Generate time points
     num_steps = int(sweep_duration / timestep)
@@ -104,9 +104,9 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
 
-    Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
+    Amp  = [np.pi/24, np.pi/12, np.pi/24, np.pi/12, 0, 0, 0, 0] 
     phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
-    Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, 0, 0, 0, 0]
+    Amp0 = [-np.pi/24, (5/12)*np.pi, np.pi/24, -(5/12)*np.pi, 0, 0, 0, 0]
     thetas = np.tile(intiial_position, (num_steps, 1)).T
 
     for joint in range(len(intiial_position)):

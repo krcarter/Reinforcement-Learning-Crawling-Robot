@@ -24,7 +24,7 @@ const int updateInterval = 20; // Update interval in milliseconds
 uint8_t servonum = 0;
 
 const float pi = 3.14159265358979323846;
-const float frequency = 2.0; // Frequency in Hz
+const float frequency = 5.0; // Frequency in Hz
 
 void setup() {
   Serial.begin(9600);
@@ -44,7 +44,7 @@ void loop() {
 
     float currentTime = currentMillis;
 
-    float amplitude = 10.0;
+    float amplitude = 15.0;
     float angle = amplitude * sin(2 * pi * frequency * currentTime / 1000.0) + 90.0; // Sine wave centered at 90 degrees
     int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
 
