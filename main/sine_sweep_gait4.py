@@ -18,11 +18,12 @@ def fk(th1, th2):
     
     P = np.array([x, y])
 
-    [x,y] = np.matmul(R,P)
+    [xr,yr] = np.matmul(R,P)
 
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x, y, label='End-Effector Trajectory')
+    plt.plot(x, y, label='Leg Rotated')
+    plt.plot(xr, yr, label='Leg Rotated')
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
     plt.ylim([-0.2,0.2])
@@ -189,7 +190,6 @@ def load_and_visualize_urdf(urdf_path):
     baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
-    print("URDF PATH:", urdf_path)
     urdf_id = p.loadURDF(urdf_path, 
                         basePosition=basePosition,
                         baseOrientation=baseOrientation,
@@ -262,5 +262,6 @@ def load_and_visualize_urdf(urdf_path):
 
 # Path to your URDF file
 #urdf_path = "crawly/crawly.urdf"  # Change this to your URDF file path
+#If this doesn't run make sure you are in the main folder
 urdf_path = "urdf/crawly.urdf"
 load_and_visualize_urdf(urdf_path)
