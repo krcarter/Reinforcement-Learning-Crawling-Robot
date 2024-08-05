@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define SERVOMAX  505 // This is the 'maximum' pulse length count (out of 4096)
 #define SERVO_FREQ 50 // Digital servos run at ~100 Hz updates
 
-#define servoChannel 1
+#define servoChannel 3
 
 // our servo # counter
 uint8_t servonum = 0;
@@ -34,7 +34,10 @@ void setup() {
 
 void loop() {
   // Initial position test
-  for (int angle = 0; angle <= 180; angle += increment) {
+  int start = 60;
+  int ending = 120;
+
+  for (int angle = start; angle <= ending; angle += increment) {
     int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
     pwm.setPWM(servoChannel, 0, pulseLength);
 
@@ -47,7 +50,7 @@ void loop() {
   }
 
   // Move back down from 180 to 0 degrees
-  for (int angle = 180; angle >= 0; angle -= increment) {
+  for (int angle = ending; angle >= start; angle -= increment) {
     int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
     pwm.setPWM(servoChannel, 0, pulseLength);
 

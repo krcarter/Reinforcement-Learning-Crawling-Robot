@@ -9,8 +9,8 @@ L1 = 0.1 # m
 L2 = 0.1 # m
 
 def fk(th1, th2):
-    x = L1 * np.cos(th1) + (L1 + L2) * np.cos(th1 + th2)
-    y = L2 * np.sin(th1) + (L1 + L2) * np.sin(th1 + th2)
+    x = L1 * np.cos(th1) + (L2) * np.cos(th1 + th2)
+    y = L2 * np.sin(th1) + (L2) * np.sin(th1 + th2)
 
     plt.figure(figsize=(10, 6))
     plt.plot(x, y, label='End-Effector Trajectory')
@@ -91,7 +91,7 @@ def crawl_walk(time):
     frequency = 1.0       # Remember servos have to be able to track this frequency
 
     # Define the simulation timestep
-    timestep = 10.0 / 240.0
+    timestep = 1.0 / 240.0
 
     # Generate time points
     num_steps = int(sweep_duration / timestep)
@@ -207,8 +207,8 @@ def load_and_visualize_urdf(urdf_path):
             step = int(current_time / timestep)
         
             if step >= num_steps:
-                break
-        
+                break   
+            
             target_position = trajectory[:, step]
 
             p.setJointMotorControlArray(

@@ -18,11 +18,18 @@ const int updateInterval = 10; // Update interval in milliseconds
 const int numServos = 4; // Number of servos
 
 const float pi = 3.14159265358979323846;
-const float frequency = 1.0; // Frequency in Hz
+const float frequency = 2.0; // Frequency in Hz
 
+/*
+// Walks backwards
 float amplitude[numServos] =     { 15.0, 30.0  , 15.0, 30.0}; // Amplitude in degrees
 float phaseShift[numServos] =    {    0, pi/2.0,    0, pi/2.0}; // Phase shift in radians
-float verticalShift[numServos] = {-15.0, 75.0  , 15.0, 75.0}; // Vertical shift in degrees
+float verticalShift[numServos] = {-15.0, 75.0  , 15.0, 105.0}; // Vertical shift in degrees
+*/
+
+float amplitude[numServos] =     { 7.5, 15.0  , 7.5, 15.0}; // Amplitude in degrees
+float phaseShift[numServos] =    {    0, pi/2.0,    0, pi/2.0}; // Phase shift in radians
+float verticalShift[numServos] = {-7.5, 75.0  , 7.5, 105.0}; // Vertical shift in degrees
 
 float simulationShift = 90.0;
 
@@ -69,7 +76,7 @@ void loop() {
         pulseLengths[i] = map(angle, 0, 180, SERVOMIN, SERVOMAX);
       }
       else{
-        float angle = amplitude[i] * sin(2 * PI * frequency * currentTime / 1000.0 + phaseShift[i]) + verticalShift[i]+30.0;
+        float angle = amplitude[i] * sin(2 * PI * frequency * currentTime / 1000.0 + phaseShift[i]) + verticalShift[i];
         pulseLengths[i] = map(angle, 0, 180, SERVOMIN, SERVOMAX);
       }
     }

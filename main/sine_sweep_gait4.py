@@ -9,13 +9,24 @@ L1 = 0.1 # m
 L2 = 0.1 # m
 
 def fk(th1, th2):
-    x = L1 * np.cos(th1) + (L1 + L2) * np.cos(th1 + th2)
-    y = L2 * np.sin(th1) + (L1 + L2) * np.sin(th1 + th2)
+    x = L1 * np.cos(th1) + (L2) * np.cos(th1 + th2)
+    y = L2 * np.sin(th1) + (L2) * np.sin(th1 + th2)
+
+    # Define the rotation matrix for 90 degrees counterclockwise
+    R = np.array([[0, 1],
+                  [-1, 0]])
+    
+    P = np.array([x, y])
+
+    [x,y] = np.matmul(R,P)
+
 
     plt.figure(figsize=(10, 6))
     plt.plot(x, y, label='End-Effector Trajectory')
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
+    plt.ylim([-0.2,0.2])
+    plt.xlim([-0.2,0.2])
     plt.title('Forward Kinematics')
     plt.legend()
     plt.grid(True)
@@ -88,7 +99,7 @@ def crawl_walk(time):
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     # frequency of the sine wave (ideally velocity control) 
-    frequency = 10.0       # Remember servos have to be able to track this frequency
+    frequency = 1.0       # Remember servos have to be able to track this frequency
 
     # Define the simulation timestep
     timestep = 1.0 / 240.0
@@ -103,10 +114,20 @@ def crawl_walk(time):
 
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
+    
 
-    Amp  = [np.pi/24, np.pi/12, np.pi/24, np.pi/12, 0, 0, 0, 0] 
+    # Amp  = [(2/12)*np.pi, np.pi/6, (2/12)*np.pi, np.pi/6, 0, 0, 0, 0] 
+    # phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    # Amp0 = [-(0/12)*np.pi, (3/12)*np.pi, (0/12)*np.pi, -(3/12)*np.pi, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
+    
+    Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
     phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
-    Amp0 = [-np.pi/24, (5/12)*np.pi, np.pi/24, -(5/12)*np.pi, 0, 0, 0, 0]
+    Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, 0, 0, 0, 0]
+    
+    # Quick Step trajectories
+    # Amp  = [np.pi/24, np.pi/12, np.pi/24, np.pi/12, 0, 0, 0, 0] 
+    # phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    # Amp0 = [-np.pi/24, (5/12)*np.pi, np.pi/24, -(5/12)*np.pi, 0, 0, 0, 0]
     thetas = np.tile(intiial_position, (num_steps, 1)).T
 
     for joint in range(len(intiial_position)):
@@ -122,6 +143,11 @@ def crawl_walk(time):
     trajectories[1] = thetas[1]
     trajectories[2] = thetas[2]
     trajectories[3] = thetas[3]
+
+    trajectories[4] = thetas[4]
+    trajectories[5] = thetas[5]
+    trajectories[6] = thetas[6]
+    trajectories[7] = thetas[7]
 
     plot_trajectory(time_points,trajectories)
     (x,y) = fk(trajectories[0], trajectories[1])
@@ -142,12 +168,12 @@ def load_and_visualize_urdf(urdf_path):
     p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
     # Change the camera view
-    camera_distance = 1.0  # Distance from the target position
-    camera_yaw = 85        # Yaw angle in degrees
-    camera_pitch = -35     # Pitch angle in degrees
-    camera_target_position = [0, 0, 0]  # Target position [x, y, z]
+    # camera_distance = 1.0  # Distance from the target position
+    # camera_yaw = 85        # Yaw angle in degrees
+    # camera_pitch = -35     # Pitch angle in degrees
+    # camera_target_position = [0, 0, 0]  # Target position [x, y, z]
 
-    p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, camera_target_position)
+    # p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, camera_target_position)
 
     # Set the gravity
     p.setGravity(0, 0, -9.81)
@@ -223,8 +249,8 @@ def load_and_visualize_urdf(urdf_path):
             
 
             # Camera Tracks the robot
-            camera_yaw += .001
-            p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, crawlyPos)
+            # camera_yaw += .001
+            # p.resetDebugVisualizerCamera(camera_distance, camera_yaw, camera_pitch, crawlyPos)
             
             #print(crawlyPos,crawlyOrn)
             #       
