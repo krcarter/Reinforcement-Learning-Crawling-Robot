@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import pybullet as p
 import pybullet_data
 import numpy as np
@@ -23,50 +24,56 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     y_rotated (ndarray): y coordinates of the half ellipse.
     """
 
-    swing_speed = 0.5 # 0 to 1
+    # Rotation matrix
+    R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
+                  [np.sin(rotation_angle),  np.cos(rotation_angle)]])
+    
+    swing_speed = 0.5 # 0 to 1 Percentage
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
     
-    theta = np.linspace(0, np.pi, stance_pts)
-    theta_inner = np.linspace(0, np.pi, swing_pts)
+    theta = np.linspace(0, np.pi, stance_pts) # only to np.pi because it is a half ellipse
 
     x = a * np.cos(theta)
     y = b * np.sin(theta)
 
-    minor_axis_shrink = 4
-    x_inner = a * np.cos(theta_inner)
-    y_inner = b/minor_axis_shrink * np.sin(theta_inner)
-
-    # Rotation matrix
-    R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
-                  [np.sin(rotation_angle), np.cos(rotation_angle)]])
-
     # Rotate and translate the points
     ellipse_points = np.array([x, y])
-    ellipse_inner_points = np.array([x_inner, y_inner])
 
     rotated_points = R @ ellipse_points
-    rotated_inner_points = R @ ellipse_inner_points
 
     x_rotated, y_rotated = rotated_points[0] + origin[0], rotated_points[1] + origin[1]
-    x_inner_rotated, y_inner_rotated = rotated_inner_points[0] + origin[0], rotated_inner_points[1] + origin[1]
+
+    # This is if I want the swing phase to model off of a ellipse also
+
+    # theta_inner = np.linspace(0, np.pi, swing_pts)
+    # minor_axis_shrink = 4
+    # x_inner = a * np.cos(theta_inner)
+    # y_inner = b/minor_axis_shrink * np.sin(theta_inner)
+    # ellipse_inner_points = np.array([x_inner, y_inner])
+    # rotated_inner_points = R @ ellipse_inner_points
+    # x_inner_rotated, y_inner_rotated = rotated_inner_points[0] + origin[0], rotated_inner_points[1] + origin[1]
+    # x_final = x_inner_rotated
+    # y_final = y_inner_rotated
+
+    # x_final = np.concatenate((x_rotated,x_inner_rotated[::-1]))
+    # y_final = np.concatenate((y_rotated,y_inner_rotated[::-1]))
     
-    # xo = x_rotated[0]
-    # xf = x_rotated[-1]
-    # yo = y_rotated[0]
-    # yf = y_rotated[-1]
+    # Straight line trajectory
+    xo = x_rotated[0]
+    xf = x_rotated[-1]
+    yo = y_rotated[0]
+    yf = y_rotated[-1]
 
-    # xline = np.linspace(xo, xf, swing_pts)
-    # yline = np.linspace(yo, yf, swing_pts)
+    xline = np.linspace(xo, xf, swing_pts)
+    yline = np.linspace(yo, yf, swing_pts)
 
-    # x_final = np.concatenate((x_rotated,xline))
-    # y_final = np.concatenate((y_rotated,yline))
+    # x_final = np.concatenate((xline,x_rotated))
+    # y_final = np.concatenate((yline,y_rotated))
 
-    x_final = x_inner_rotated
-    y_final = y_inner_rotated
+    x_final = np.concatenate((x_rotated[::-1],xline))
+    y_final = np.concatenate((y_rotated[::-1],yline))
 
-    x_final = np.concatenate((x_rotated,x_inner_rotated[::-1]))
-    y_final = np.concatenate((y_rotated,y_inner_rotated[::-1]))
 
     print(x_final)
     print(x_final.shape)
@@ -75,16 +82,61 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
     return x_final, y_final
 
-def fk(th1, th2):
-    th1 = th1 - np.pi/2 # do this to rotate the zero position I want it so leg laying flat is zero  o - -
+def foot_trajectory(num_steps):
+    # Parameters
+    a1 = 0.15/2  # Major axis length
+    b1 = 0.06  # Minor axis length
 
-    x = L1 * np.cos(th1) + (L1 + L2) * np.cos(th1 + th2)
-    y = L2 * np.sin(th1) + (L1 + L2) * np.sin(th1 + th2)
+    rotation_adjustment = 15 * (np.pi/180)
+    R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
+                  [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
+
+    origin1 = np.array([0.13, 0.0])  # Origin of the ellipse
+
+    origin1 = np.matmul(R,origin1)
+
+    rotation_angle1 = -(1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
+
+    # Generate half ellipse points
+    xf, yf = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
+    plot_xy(xf,yf)
+    (theta0,theta1) =  trajectory_to_angles(xf,yf)
+    (x,y) = fk(theta0, theta1)
+    (xr,yr) = fk(-1*theta0[::-1],-1*theta1[::-1])
+
+    
+    # Parameters
+    # a2 = 0.3/2  # Major axis length
+    # b2 = 0.25/2  # Minor axis length
+    # origin2 = (0.0, 0.0)  # Origin of the ellipse
+    # rotation_angle2 = -np.pi/4  # Rotation angle in radians
+
+    # xb, yb = half_ellipse(a2, b2, origin2, rotation_angle2, num_steps)
+    # plot_xy(xb,yb)
+    # (theta4,theta5) =  trajectory_to_angles(xb,yb)
+
+    return (theta0,theta1)
+
+def fk(th1, th2):
+    x = L1 * np.cos(th1) + (L2) * np.cos(th1 + th2)
+    y = L2 * np.sin(th1) + (L2) * np.sin(th1 + th2)
+
+    # Define the rotation matrix for 90 degrees counterclockwise
+    R = np.array([[0, 1],
+                  [-1, 0]])
+    
+    P = np.array([x, y])
+
+    [xr,yr] = np.matmul(R,P)
+
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x, y, label='End-Effector Trajectory')
+    plt.plot(x, y, label='Leg Rotated')
+    plt.plot(xr, yr, label='Leg Rotated')
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
+    plt.ylim([-0.2,0.2])
+    plt.xlim([-0.2,0.2])
     plt.title('Forward Kinematics')
     plt.legend()
     plt.grid(True)
@@ -153,16 +205,29 @@ def plot_xy(x, y):
     Plots the ellipse using the provided x and y coordinates.
     """
     plt.figure(figsize=(8, 6))
-    plt.plot(x, y, label="XY")
+    #plt.plot(x, y, label="XY")
+    # Normalize the path length for the colormap
+    norm = plt.Normalize(0, 0.7*len(x))
+
+    # Create a colormap
+    colors = cm.viridis(norm(range(len(x))))
+
+    # Plot the trajectory with a gradient color
+    for i in range(len(x) - 1):
+        plt.plot(x[i:i+2], y[i:i+2], color=colors[i], linewidth=2)
+
     plt.scatter([x[0], x[-1]], [y[0], y[-1]], color='red')  # Plot endpoints for clarity
-    plt.xlabel('x')
-    plt.ylabel('y')
+    plt.xlabel('x [m]')
+    plt.ylabel('y [m]')
+
     plt.axhline(0, color='black',linewidth=0.5)
     plt.axvline(0, color='black',linewidth=0.5)
     plt.grid(color = 'gray', linestyle = '--', linewidth = 0.5)
     plt.legend()
+    plt.ylim([-0.2,0.2])
+    plt.xlim([-0.2,0.2])
     plt.title('XY Plot')
-    plt.axis('equal')
+    #plt.axis('equal')
     plt.show()
 
 
@@ -185,37 +250,17 @@ def walk(time):
     # Repeat the values to fill an 8x100 array
     trajectories = np.tile(intiial_position, (num_steps, 1)).T
 
-    # Parameters
-    a1 = 0.3/2  # Major axis length
-    b1 = 0.25/2  # Minor axis length
-    origin1 = (0.0, 0.0)  # Origin of the ellipse
-    rotation_angle1 = -np.pi/12  # Rotation angle in radians
-
-    # Generate half ellipse points
-    xf, yf = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
-    plot_xy(xf,yf)
-    (theta0,theta1) =  trajectory_to_angles(xf,yf)
-
-
-    # Parameters
-    a2 = 0.3/2  # Major axis length
-    b2 = 0.25/2  # Minor axis length
-    origin2 = (0.0, 0.0)  # Origin of the ellipse
-    rotation_angle2 = -np.pi/4  # Rotation angle in radians
-
-    xb, yb = half_ellipse(a2, b2, origin2, rotation_angle2, num_steps)
-    plot_xy(xb,yb)
-    (theta4,theta5) =  trajectory_to_angles(xb,yb)
+    (theta0,theta1) = foot_trajectory(num_steps)
 
     
-    # trajectories[0] = theta0
-    # trajectories[1] = theta1
-    # trajectories[2] = -1*theta0
-    # trajectories[3] = -1*theta1
-    trajectories[4] = theta4
-    trajectories[5] = theta5
-    trajectories[6] = -1*theta4
-    trajectories[7] = -1*theta5
+    trajectories[0] = theta0
+    trajectories[1] = theta1
+    trajectories[2] = -1*theta0
+    trajectories[3] = -1*theta1
+    # trajectories[4] = theta4
+    # trajectories[5] = theta5
+    # trajectories[6] = -1*theta4
+    # trajectories[7] = -1*theta5
 
 
     plot_trajectory(time_points,trajectories)
