@@ -84,14 +84,14 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
 def foot_trajectory(num_steps):
     # Parameters
-    a1 = 0.15/2  # Major axis length
-    b1 = 0.06  # Minor axis length
+    a1 = 0.10/2  # Major axis length
+    b1 = 0.04  # Minor axis length
 
-    rotation_adjustment = 15 * (np.pi/180)
+    rotation_adjustment = -5 * (np.pi/180)
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin1 = np.array([0.13, 0.0])  # Origin of the ellipse
+    origin1 = np.array([0.14, 0.0])  # Origin of the ellipse
 
     origin1 = np.matmul(R,origin1)
 
@@ -234,7 +234,7 @@ def plot_xy(x, y):
 
 def walk(time):
     #
-    intiial_position = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0]
+    intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0]
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
@@ -255,8 +255,8 @@ def walk(time):
     
     trajectories[0] = theta0
     trajectories[1] = theta1
-    trajectories[2] = -1*theta0
-    trajectories[3] = -1*theta1
+    # trajectories[2] = -1*theta0
+    # trajectories[3] = -1*theta1
     # trajectories[4] = theta4
     # trajectories[5] = theta5
     # trajectories[6] = -1*theta4
