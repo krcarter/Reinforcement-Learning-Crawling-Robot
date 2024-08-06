@@ -74,24 +74,27 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     x_final = np.concatenate((x_rotated[::-1],xline))
     y_final = np.concatenate((y_rotated[::-1],yline))
 
+    x_final_r = np.concatenate((x_rotated[::-1],xline))
+    y_final_r = np.concatenate((y_rotated[::-1],yline))
+
 
     print(x_final)
     print(x_final.shape)
     print(y_final)
     print(y_final.shape)
 
-    return x_final, y_final
+    return (x_final, y_final)
 
 def foot_trajectory(num_steps):
     # Parameters
     a1 = 0.10/2  # Major axis length
-    b1 = 0.04  # Minor axis length
+    b1 = 0.03  # Minor axis length
 
     rotation_adjustment = -5 * (np.pi/180)
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin1 = np.array([0.14, 0.0])  # Origin of the ellipse
+    origin1 = np.array([0.15, 0.0])  # Origin of the ellipse
 
     origin1 = np.matmul(R,origin1)
 
@@ -131,10 +134,23 @@ def fk(th1, th2):
 
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x, y, label='Leg Rotated')
-    plt.plot(xr, yr, label='Leg Rotated')
+    #plt.plot(x, y, label='Leg Rotated')
+    # Normalize the path length for the colormap
+    norm = plt.Normalize(0, 0.7*len(x))
+
+    # Create a colormap
+    colors = cm.viridis(norm(range(len(x))))
+
+    # Plot the trajectory with a gradient color
+    for i in range(len(x) - 1):
+        plt.plot(x[i:i+2], y[i:i+2], color=colors[i], linewidth=2)
+    #plt.plot(xr, yr, label='Leg Rotated')
+    for i in range(len(xr) - 1):
+        plt.plot(xr[i:i+2], yr[i:i+2], color=colors[i], linewidth=2)
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
+    plt.axhline(0, color='black',linewidth=0.5)
+    plt.axvline(0, color='black',linewidth=0.5)
     plt.ylim([-0.2,0.2])
     plt.xlim([-0.2,0.2])
     plt.title('Forward Kinematics')
