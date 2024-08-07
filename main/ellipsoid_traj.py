@@ -74,8 +74,11 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     x_final = np.concatenate((x_rotated[::-1],xline))
     y_final = np.concatenate((y_rotated[::-1],yline))
 
-    x_final_r = np.concatenate((x_rotated[::-1],xline))
-    y_final_r = np.concatenate((y_rotated[::-1],yline))
+    x_final_r = x_rotated
+    y_final_r = y_rotated
+
+    # x_final_r = np.concatenate((x_rotated[::-1],xline))
+    # y_final_r = np.concatenate((y_rotated[::-1],yline))
 
 
     print(x_final)
@@ -83,7 +86,7 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     print(y_final)
     print(y_final.shape)
 
-    return (x_final, y_final)
+    return (x_final, y_final,x_final_r,y_final_r)
 
 def foot_trajectory(num_steps):
     # Parameters
@@ -101,11 +104,13 @@ def foot_trajectory(num_steps):
     rotation_angle1 = -(1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
 
     # Generate half ellipse points
-    xf, yf = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
-    plot_xy(xf,yf)
-    (theta0,theta1) =  trajectory_to_angles(xf,yf)
-    (x,y) = fk(theta0, theta1)
-    (xr,yr) = fk(-1*theta0[::-1],-1*theta1[::-1])
+    xl,yl,xr,yr = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
+    plot_xy(xl,yl)
+    plot_xy(xr,yr)
+    (theta0,theta1) =  trajectory_to_angles(xl,yl)
+    (theta2,theta3) =  trajectory_to_angles(xr,yr)
+    (xl_c,yl_c) = fk(theta0, theta1)
+    (xr_c,yr_c) = fk(-theta2, -theta3)
 
     
     # Parameters
