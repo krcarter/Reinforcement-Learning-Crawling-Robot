@@ -124,7 +124,7 @@ def foot_trajectory(num_steps):
     # xb, yb = half_ellipse(a2, b2, origin2, rotation_angle2, num_steps)
     # plot_xy(xb,yb)
     # (theta4,theta5) =  trajectory_to_angles(xb,yb)
-
+    print('hi')
     return (theta0,theta1,-theta2,-theta3)
 
 def fk(th1, th2):
