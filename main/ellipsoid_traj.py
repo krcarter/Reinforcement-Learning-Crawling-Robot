@@ -81,8 +81,8 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     # y_final_r = y_rotated
     
     # Working both arms move at the same time
-    # x_final_r = np.concatenate((x_rotated[::-1],xline))
-    # y_final_r = np.concatenate((y_rotated[::-1],yline))
+    x_final_r = np.concatenate((x_rotated[::-1],xline))
+    y_final_r = np.concatenate((y_rotated[::-1],yline))
 
     # x_final_r = x_rotated[::-1]
     # y_final_r = y_rotated[::-1]
@@ -400,6 +400,8 @@ def load_and_visualize_urdf(urdf_path):
     #Generate Trajectory
     sweep_duration = 5.0 #seconds
     trajectory = walk(sweep_duration) # 8 x n array
+    np.savetxt('trajectory.csv', trajectory, delimiter=',')
+
 
     # Generate time points
     timestep = 1.0 / 240.0
