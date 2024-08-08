@@ -28,11 +28,11 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
                   [np.sin(rotation_angle),  np.cos(rotation_angle)]])
     
-    swing_speed = 0.95 # 0 to 1 Percentage
+    swing_speed = 0.30 # 0 to 1 Percentage
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
     
-    theta = np.linspace(0, np.pi, stance_pts) # only to np.pi because it is a half ellipse
+    theta = np.linspace(0, np.pi, swing_pts) # only to np.pi because it is a half ellipse
 
     x = a * np.cos(theta)
     y = b * np.sin(theta)
@@ -65,11 +65,14 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     yo = y_rotated[0]
     yf = y_rotated[-1]
 
-    xline = np.linspace(xo, xf, swing_pts)
-    yline = np.linspace(yo, yf, swing_pts)
+    xline = np.linspace(xo, xf, stance_pts)
+    yline = np.linspace(yo, yf, stance_pts)
 
     # x_final = np.concatenate((xline,x_rotated))
     # y_final = np.concatenate((yline,y_rotated))
+
+    print('Length of stance x:  ',len(x_rotated))
+    print('Length of swing x:  ',len(xline))
 
     x_final = np.concatenate((x_rotated[::-1],xline))
     y_final = np.concatenate((y_rotated[::-1],yline))
@@ -77,8 +80,11 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     # x_final_r = x_rotated
     # y_final_r = y_rotated
 
-    x_final_r = np.concatenate((xline[::-1],x_rotated))
-    y_final_r = np.concatenate((yline[::-1],y_rotated))
+    x_final_r = np.concatenate((x_rotated[::-1],xline))
+    y_final_r = np.concatenate((y_rotated[::-1],yline))
+
+    # x_final_r = np.concatenate((xline[::-1],x_rotated))
+    # y_final_r = np.concatenate((yline[::-1],y_rotated))
 
 
     print(x_final)
@@ -90,23 +96,24 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
 def foot_trajectory(num_steps):
     # Parameters
-    a1 = 0.15/2  # Major axis length
-    b1 = 0.04  # Minor axis length
+    a1 = 0.10/2  # Major axis length
+    b1 = 0.05  # Minor axis length
 
     rotation_adjustment = -5 * (np.pi/180)
+
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin1 = np.array([0.13, 0.0])  # Origin of the ellipse
+    origin1 = np.array([0.15, 0.05])  # Origin of the ellipse
 
     origin1 = np.matmul(R,origin1)
 
-    rotation_angle1 = -(1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
+    rotation_angle1 = (1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
 
     # Generate half ellipse points
     xl,yl,xr,yr = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
-    plot_xy(xl,yl)
-    plot_xy(xr,yr)
+    # plot_xy(xl,yl)
+    # plot_xy(xr,yr)
     (theta0,theta1) =  trajectory_to_angles(xl,yl)
     (theta2,theta3) =  trajectory_to_angles(xr,yr)
 
@@ -154,6 +161,8 @@ def fk(th1, th2):
     #plt.plot(xr, yr, label='Leg Rotated')
     for i in range(len(xr) - 1):
         plt.plot(xr[i:i+2], yr[i:i+2], color=colors[i], linewidth=2)
+    plt.scatter([x[0], x[-1]], [y[0], y[-1]], color='red')  # Plot endpoints for clarity
+    plt.scatter([xr[0], xr[-1]], [yr[0], yr[-1]], color='red')  # Plot endpoints for clarity
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
     plt.axhline(0, color='black',linewidth=0.5)
@@ -257,7 +266,8 @@ def plot_xy(x, y):
 
 def walk(time):
     #
-    intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0]
+    #intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
+    intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
@@ -366,12 +376,15 @@ def load_and_visualize_urdf(urdf_path):
 
     #print("JointInfo: ", p.getJointInfo(urdf_id))
     # Set the initial position and orientation of the URDF
-    initial_position = [0, 0, 1] #x,y,z
-    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy?
+    initial_position = [0, 0, .2] #x,y,z
+    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy? Robot laying flat
+    #initial_orientation = p.getQuaternionFromEuler([np.pi/2, -np.pi/2, 0]) # Robot lying on its side
+    #initial_orientation = p.getQuaternionFromEuler([np.pi/2, np.pi/2, 0]) # Robot lying on its other side
     p.resetBasePositionAndOrientation(urdf_id, initial_position, initial_orientation)
 
     print("NumJoints: ", p.getNumJoints(urdf_id))
-    initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
+    #initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
+    initial_joint_angles = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     #initial_joint_angles = [np.pi/4, -np.pi/2, -np.pi/4, np.pi/2, -np.pi/4, np.pi/2, np.pi/4, -np.pi/2] # standing up
 
     for joint in range(num_joint):
