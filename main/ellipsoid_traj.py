@@ -79,12 +79,16 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
     # x_final_r = x_rotated
     # y_final_r = y_rotated
+    
+    # Working both arms move at the same time
+    # x_final_r = np.concatenate((x_rotated[::-1],xline))
+    # y_final_r = np.concatenate((y_rotated[::-1],yline))
 
-    x_final_r = np.concatenate((x_rotated[::-1],xline))
-    y_final_r = np.concatenate((y_rotated[::-1],yline))
+    # x_final_r = x_rotated[::-1]
+    # y_final_r = y_rotated[::-1]
 
-    # x_final_r = np.concatenate((xline[::-1],x_rotated))
-    # y_final_r = np.concatenate((yline[::-1],y_rotated))
+    # x_final_r = np.concatenate((x_rotated,xline[::-1]))
+    # y_final_r = np.concatenate((y_rotated,yline[::-1]))
 
 
     print(x_final)
