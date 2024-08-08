@@ -12,7 +12,7 @@ L2 = 0.1 # m
 def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     """
     Generates the points for a half ellipse.
-    
+
     Parameters:
     a (float): Major axis length.
     b (float): Minor axis length.
@@ -28,7 +28,7 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
                   [np.sin(rotation_angle),  np.cos(rotation_angle)]])
     
-    swing_speed = 0.5 # 0 to 1 Percentage
+    swing_speed = 0.95 # 0 to 1 Percentage
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
     
@@ -74,11 +74,11 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     x_final = np.concatenate((x_rotated[::-1],xline))
     y_final = np.concatenate((y_rotated[::-1],yline))
 
-    x_final_r = x_rotated
-    y_final_r = y_rotated
+    # x_final_r = x_rotated
+    # y_final_r = y_rotated
 
-    # x_final_r = np.concatenate((x_rotated[::-1],xline))
-    # y_final_r = np.concatenate((y_rotated[::-1],yline))
+    x_final_r = np.concatenate((xline[::-1],x_rotated))
+    y_final_r = np.concatenate((yline[::-1],y_rotated))
 
 
     print(x_final)
@@ -90,14 +90,14 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
 def foot_trajectory(num_steps):
     # Parameters
-    a1 = 0.10/2  # Major axis length
-    b1 = 0.03  # Minor axis length
+    a1 = 0.15/2  # Major axis length
+    b1 = 0.04  # Minor axis length
 
     rotation_adjustment = -5 * (np.pi/180)
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin1 = np.array([0.15, 0.0])  # Origin of the ellipse
+    origin1 = np.array([0.13, 0.0])  # Origin of the ellipse
 
     origin1 = np.matmul(R,origin1)
 
@@ -109,6 +109,8 @@ def foot_trajectory(num_steps):
     plot_xy(xr,yr)
     (theta0,theta1) =  trajectory_to_angles(xl,yl)
     (theta2,theta3) =  trajectory_to_angles(xr,yr)
+
+    #
     (xl_c,yl_c) = fk(theta0, theta1)
     (xr_c,yr_c) = fk(-theta2, -theta3)
 
@@ -123,7 +125,7 @@ def foot_trajectory(num_steps):
     # plot_xy(xb,yb)
     # (theta4,theta5) =  trajectory_to_angles(xb,yb)
 
-    return (theta0,theta1)
+    return (theta0,theta1,-theta2,-theta3)
 
 def fk(th1, th2):
     x = L1 * np.cos(th1) + (L2) * np.cos(th1 + th2)
@@ -271,13 +273,13 @@ def walk(time):
     # Repeat the values to fill an 8x100 array
     trajectories = np.tile(intiial_position, (num_steps, 1)).T
 
-    (theta0,theta1) = foot_trajectory(num_steps)
+    (theta0,theta1,theta2,theta3) = foot_trajectory(num_steps)
 
     
     trajectories[0] = theta0
     trajectories[1] = theta1
-    # trajectories[2] = -1*theta0
-    # trajectories[3] = -1*theta1
+    trajectories[2] = theta2
+    trajectories[3] = theta3
     # trajectories[4] = theta4
     # trajectories[5] = theta5
     # trajectories[6] = -1*theta4
