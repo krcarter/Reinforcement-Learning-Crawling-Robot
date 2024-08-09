@@ -268,16 +268,13 @@ def plot_xy(x, y):
 
 
 
-def walk(time):
+def walk(time, timestep):
     #
     #intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
     intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
-
-    # Define the simulation timestep
-    timestep = 1.0 / 240.0
 
     # Generate time points
     num_steps = int(sweep_duration / timestep)
@@ -398,22 +395,27 @@ def load_and_visualize_urdf(urdf_path):
 
 
     #Generate Trajectory
-    sweep_duration = 5.0 #seconds
-    trajectory = walk(sweep_duration) # 8 x n array
-
-
-
+    sweep_duration = 1.0 #seconds
     # Generate time points
-    timestep = 1.0 / 240.0
+    timestep = 1.0 / 100.0
     num_steps = int(sweep_duration / timestep)
 
     joint_index = 0
 
+    trajectory = walk(sweep_duration,timestep) # 8 x n array
 
-    ### CSV Trajectory ###
+
+    #Simulation to Real Conversion
     print(type(trajectory))
     degrees_trajectory = np.degrees(trajectory)
     rounded_trajectory = np.round(degrees_trajectory, 2)
+
+    rounded_trajectory[0] = rounded_trajectory[0] + 120
+    rounded_trajectory[1] = rounded_trajectory[1] 
+    rounded_trajectory[2] = rounded_trajectory[2] + 60
+    rounded_trajectory[3] = -1 * rounded_trajectory[3]
+
+    ### CSV Trajectory ###
     np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
 
     ### Text File ###
