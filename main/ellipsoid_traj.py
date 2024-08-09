@@ -408,10 +408,10 @@ def load_and_visualize_urdf(urdf_path):
     #Simulation to Real Conversion
     print(type(trajectory))
     degrees_trajectory = np.degrees(trajectory)
-    rounded_trajectory = np.round(degrees_trajectory, 2)
+    rounded_trajectory = np.round(degrees_trajectory, 0)
 
     rounded_trajectory[0] = rounded_trajectory[0] + 120
-    rounded_trajectory[1] = rounded_trajectory[1] 
+    rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
     rounded_trajectory[2] = rounded_trajectory[2] + 60
     rounded_trajectory[3] = -1 * rounded_trajectory[3]
 
@@ -424,11 +424,11 @@ def load_and_visualize_urdf(urdf_path):
     with open('arduino_arrays.txt', 'w') as file:
         for idx, row in enumerate(rounded_trajectory, start=1):
             # Format each value in the row to two decimal places
-            formatted_values = ', '.join(f"{val:.2f}" for val in row)
+            formatted_values = ', '.join(f"{val:.0f}" for val in row)
             
             # Create the Arduino array string
             #num_steps_string = str(num_steps)
-            array_string = f"float row_{idx}[{num_steps}] = {{ {formatted_values} }};\n"
+            array_string = f"int row_{idx}[{num_steps}] = {{ {formatted_values} }};\n"
             
             # Write the array string to the file
             file.write(array_string)

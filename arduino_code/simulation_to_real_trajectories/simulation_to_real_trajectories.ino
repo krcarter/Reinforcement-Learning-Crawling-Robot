@@ -30,10 +30,10 @@ void setup() {
   // HACKY but wanted get this up and running quick
   // Set Back legs intials conditions
 
-  int J4 = map(5, 0, 180, SERVOMIN, SERVOMAX);
-  int J5 = map(5, 0, 180, SERVOMIN, SERVOMAX);
-  int J6 = map(175, 0, 180, SERVOMIN, SERVOMAX);
-  int J7 = map(175, 0, 180, SERVOMIN, SERVOMAX);
+  int J4 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+  int J5 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+  int J6 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+  int J7 = map(90, 0, 180, SERVOMIN, SERVOMAX);
 
   pwm.setPWM(4, 0, J4);
   pwm.setPWM(5, 0, J5);
@@ -52,11 +52,13 @@ void loop() {
     Serial.print(":  ");
     Serial.println(row_1[currentPosition]);
 
+    
     int J0 = map(row_1[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
     int J1 = map(row_2[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
-    //int J1 = map(90, 0, 180, SERVOMIN, SERVOMAX);
     int J2 = map(row_3[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
     int J3 = map(row_4[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
+
+    //int J1 = map(90, 0, 180, SERVOMIN, SERVOMAX);
 
     pwm.setPWM(0, 0, J0);
     pwm.setPWM(1, 0, J1);
