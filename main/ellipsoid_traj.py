@@ -400,7 +400,7 @@ def load_and_visualize_urdf(urdf_path):
     #Generate Trajectory
     sweep_duration = 5.0 #seconds
     trajectory = walk(sweep_duration) # 8 x n array
-    np.savetxt('trajectory.csv', trajectory, delimiter=',')
+
 
 
     # Generate time points
@@ -409,6 +409,28 @@ def load_and_visualize_urdf(urdf_path):
 
     joint_index = 0
 
+
+    ### CSV Trajectory ###
+    print(type(trajectory))
+    degrees_trajectory = np.degrees(trajectory)
+    rounded_trajectory = np.round(degrees_trajectory, 2)
+    np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
+
+    ### Text File ###
+
+    # Open a text file to write the formatted arrays
+    with open('arduino_arrays.txt', 'w') as file:
+        for idx, row in enumerate(rounded_trajectory, start=1):
+            # Format each value in the row to two decimal places
+            formatted_values = ', '.join(f"{val:.2f}" for val in row)
+            
+            # Create the Arduino array string
+            #num_steps_string = str(num_steps)
+            array_string = f"float row_{idx}[{num_steps}] = {{ {formatted_values} }};\n"
+            
+            # Write the array string to the file
+            file.write(array_string)
+            
     # Run the simulation
     while True:
         start_time = time.time()
