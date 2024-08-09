@@ -423,7 +423,7 @@ def load_and_visualize_urdf(urdf_path):
     # Open a text file to write the formatted arrays
     with open('arduino_arrays.txt', 'w') as file:
         for idx, row in enumerate(rounded_trajectory, start=1):
-            # Format each value in the row to two decimal places
+            # Format each value in the row no decimals
             formatted_values = ', '.join(f"{val:.0f}" for val in row)
             
             # Create the Arduino array string

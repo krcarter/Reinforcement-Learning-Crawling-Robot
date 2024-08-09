@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 
 unsigned long previousMillis = 0;
-const long updateInterval = 20;  // updateInterval in milliseconds
+const long updateInterval = 10;  // updateInterval in milliseconds
 
 int currentPosition = 0;
 
@@ -52,13 +52,16 @@ void loop() {
     Serial.print(":  ");
     Serial.println(row_1[currentPosition]);
 
-    
+
     int J0 = map(row_1[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
     int J1 = map(row_2[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
     int J2 = map(row_3[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
     int J3 = map(row_4[currentPosition], 0, 180, SERVOMIN, SERVOMAX);
 
-    //int J1 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+    // int J0 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+    // int J1 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+    // int J2 = map(90, 0, 180, SERVOMIN, SERVOMAX);
+    // int J3 = map(90, 0, 180, SERVOMIN, SERVOMAX);
 
     pwm.setPWM(0, 0, J0);
     pwm.setPWM(1, 0, J1);
