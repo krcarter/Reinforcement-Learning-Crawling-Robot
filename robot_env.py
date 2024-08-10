@@ -7,7 +7,6 @@ import time
 
 class RobotEnv(gym.Env):
     def __init__(self, urdf_path, render = False, show_training = True):
-        #print("HI I AM INTIALIZE:")
         super(RobotEnv, self).__init__() # It ensures that the initialization code defined in the superclass (gym.Env) is run
         self.urdf_path = urdf_path
 
@@ -62,7 +61,6 @@ class RobotEnv(gym.Env):
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
         for joint in range(self.num_joints):
-            print("HI MY JOINTS ARE RESETTING")
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
             print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
@@ -117,22 +115,12 @@ class RobotEnv(gym.Env):
         
         self._last_base_position = [0, 0, 0]
         self._last_base_orientation = [0, 0, 0]
-        #num_joint = p.getNumJoints(urdf_id)
-
-        # Set the initial position and orientation of the base link from URDF
-        # initial_position = [0, 0, 1] #x,y,z
-        # initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy?
-        # p.resetBasePositionAndOrientation(self.urdf_path, initial_position, initial_orientation)
-        
-
-        # Set the intial joint angles
 
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
         for joint in range(self.num_joints):
             p.resetJointState(self.robot_id, joint,initial_joint_angles[joint])
             p.enableJointForceTorqueSensor(self.robot_id, joint, 1)
-            # print("HI MY JOINTS ARE RESETTING")
             # print('JointInfo' + str(joint) + ": ", p.getJointInfo(self.robot_id, joint))
 
         self.current_step = 0  # Reset the step counter at the beginning of each episode
@@ -153,14 +141,11 @@ class RobotEnv(gym.Env):
             time_to_sleep = self._action_repeat * self._time_step - time_spent
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
-        
-        #   Camera
 
         # Camera Tracks the robot
         self.camera_yaw += .001
-        self.camera_target_position  = self.base_position
+        self.camera_target_position = self.base_position
         p.resetDebugVisualizerCamera(self.camera_distance, self.camera_yaw, self.camera_pitch, self.camera_target_position )
-
 
         # Commands
         for i in range(self.num_joints):
@@ -170,7 +155,6 @@ class RobotEnv(gym.Env):
         
         obs = self._get_observation()
         reward = self._compute_reward()
-        #print("Fall Check: ", self._check_fall())
         done = self._is_done() or self._check_fall()
 
         self.current_step += 1  # Increment the step counter
@@ -180,56 +164,52 @@ class RobotEnv(gym.Env):
     def _get_observation(self):
         # Example Get observation
         # (https://github.com/bulletphysics/bullet3/blob/master/examples/pybullet/gym/pybullet_envs/robot_locomotors.py)
-        # def calc_state(self):
+        # def calc_state(self)
 
-        #print((self.num_joints))
-        #print(self.joint_index_list)
-        #print(p.getJointStates(self.robot_id, self.joint_index_list))
-        #print(p.getJointStates(self.robot_id, [0,1]))
-        #print("OBSERVATION")
+
         joint_states = p.getJointStates(self.robot_id, range(self.num_joints))
-        joint_positions = [state[0] for state in joint_states]
-        joint_velocities = [state[1] for state in joint_states]
+        joint_positions = [state[0] for state in joint_states] #1x8 
+        joint_velocities = [state[1] for state in joint_states] #1x8
 
-        self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id)
-        self.base_linear_velocity, self.base_angular_velocity = p.getBaseVelocity(self.robot_id)
+        self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id) #1x3 [x,y,z], 1x4 [x,y,z,w]
+        self.base_linear_velocity, self.base_angular_velocity = p.getBaseVelocity(self.robot_id) #1x3 [x,y,z], 1x3 [wx,wy,wz]
     
-        observation = np.concatenate([joint_positions, joint_velocities, self.base_position, self.base_orientation, self.base_linear_velocity, self.base_angular_velocity])
-        # ToDo 
-        # Check if joints are at their limitis
+        observation = np.concatenate([joint_positions, joint_velocities, self.base_position, self.base_orientation, self.base_linear_velocity, self.base_angular_velocity]) #8+8+3+4+3+3 = 29 observed states
+
+        # Other Possible Observations 
+        # If trying have robot reach a target:
         # Get angle of the robot in comparison of the target
         # Get difference of the robot compared to target
 
         return observation
-        #return np.array(joint_positions + joint_velocities)
 
     def _compute_reward(self):
 
-        self._distance_weight = 1.0
+        # ToDo
+        # Negative Reward for joints_at limit
+        # Negative Reward for joint_collisions
+        # Negative Reward for side to side motion
+        # Negative Reward for body rotation
+
+        self._distance_weight = 1.0 # To use in future when having a goal target position
         self._energy_weight = 0.005
         self._shake_weight = 0.005
         self._drift_weight = 0.005
         self._velocity_weight = 0.1
     
         # Get the linear velocity of the base link of the robot
-        linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
         # Calculate the magnitude (absolute value) of the linear velocity
+        linear_velocity, angular_velocity = p.getBaseVelocity(self.robot_id)
 
         # velocity_magnitude = np.linalg.norm(linear_velocity) # for bounding gait I used the x,y,z components of velocity
-    
         velocity_magnitude = np.linalg.norm(linear_velocity[:2]) # Use only x and y components of the linear velocity
-        #
-        # The reward is the magnitude of the base link's velocity
 
+        # The reward is the magnitude of the base link's velocity
         self.current_base_position, self.current_base_orientation = p.getBasePositionAndOrientation(self.robot_id)
 
         forward_reward = self.current_base_position[0] - self._last_base_position[0]
-        drift_reward = -abs(self.current_base_position[1] - self._last_base_position[1]) # negative to reduce drift
-        shake_reward = -abs(self.current_base_position[2] - self._last_base_position[2]) # negative to reduce shaking
-
-        # print('Reward')
-        # print(forward_reward, drift_reward, shake_reward)
-        # print(type(forward_reward),type(drift_reward),type(shake_reward))
+        drift_reward = -abs(self.current_base_position[1] - self._last_base_position[1]) # negative to reduce drift (yf-yo)
+        shake_reward = -abs(self.current_base_position[2] - self._last_base_position[2]) # negative to reduce shaking (zf-zo)
 
         self._last_base_position = self.current_base_position
 
@@ -237,27 +217,14 @@ class RobotEnv(gym.Env):
         joint_torques = [state[3] for state in joint_states]
         joint_motor_velocities = [state[1] for state in joint_states]
         
-        energy_reward = abs(np.dot(joint_torques, joint_motor_velocities))  * self._time_step # Negative to penalize energy consumption
+        energy_reward = abs(np.dot(joint_torques, joint_motor_velocities))  * self._time_step # Negative to penalize energy consumption E = (T*dq)/(delta(t))
 
-        # ToDo
-        # Positive Reward for walking to target (some object very far away)
-        # Negative Reward for robot being on its side or back
-        # Negative Reward for joints_at limit
-        # Negative Reward for joint_collisions
-        # Negative Reward for side to side motion
-        # Negative Reward for body rotation
-
-
-        # weights = [1]
-        # reward =  - velocity_magnitude 
         # Penalize falling 
         fall_weight = -1
         fall_penalty = fall_weight if self._check_fall() else 0
 
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
-
-        # Crawling
 
         reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward + self._shake_weight * shake_reward + fall_penalty)
 

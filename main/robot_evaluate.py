@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("--render", type=bool, default=True, help="Render the environment")
     parser.add_argument("--model_path", type=str, required=True, help="Path to the trained model")
 
+    #python robot_evaluate.py --render True --model_path models\ppo_robot_bound_best
     args = parser.parse_args()
 
     evaluate_model(args.model_path, args.render)
