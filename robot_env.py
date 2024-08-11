@@ -52,8 +52,11 @@ class RobotEnv(gym.Env):
                             baseOrientation=baseOrientation,
                             flags=flags)
         
-        self._last_base_position = [0, 0, 0]
+        self._last_base_position    = [0, 0, 0]
         self._last_base_orientation = [0, 0, 0]
+        self._last_joint_positions  = [0, 0, 0, 0, 0, 0, 0, 0]
+        self._last_joint_velocities = [0, 0, 0, 0, 0, 0, 0, 0]
+        
         self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id)
         self.num_joints = p.getNumJoints(self.robot_id)
         self.joint_index_list = list(range(self.num_joints))
@@ -70,8 +73,8 @@ class RobotEnv(gym.Env):
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
 
         # Crawl Gait 1
-        action_low  = np.array([-60,   0,-60,   0, 90, 15, -90, -15]) * np.pi/180
-        action_high = np.array([ 60, 120, 60, 120, 90, 15, -90, -15]) * np.pi/180
+        action_low  = np.array([ 0,   0,-60, -120, -15,  75,-15, -105]) * np.pi/180
+        action_high = np.array([ 60, 120, 0,    0,  15, 105, 15,  -75]) * np.pi/180
 
         # Bound Gait 1
         # action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
@@ -113,8 +116,10 @@ class RobotEnv(gym.Env):
                             baseOrientation=baseOrientation,
                             flags=flags)
         
-        self._last_base_position = [0, 0, 0]
+        self._last_base_position    = [0, 0, 0]
         self._last_base_orientation = [0, 0, 0]
+        self._last_joint_positions  = [0, 0, 0, 0, 0, 0, 0, 0]
+        self._last_joint_velocities = [0, 0, 0, 0, 0, 0, 0, 0]
 
         initial_joint_angles = [np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2, 0] # laying flat
 
@@ -147,9 +152,19 @@ class RobotEnv(gym.Env):
         self.camera_target_position = self.base_position
         p.resetDebugVisualizerCamera(self.camera_distance, self.camera_yaw, self.camera_pitch, self.camera_target_position )
 
+        #MG995 Servo Specs
+        max_servo_velocity = 8.055 #rad/s
+        max_servo_force = 1.177 #Nm
+
         # Commands
         for i in range(self.num_joints):
-            p.setJointMotorControl2(self.robot_id, i, p.POSITION_CONTROL, targetPosition=action[i])
+            p.setJointMotorControl2(self.robot_id, 
+                                    i, 
+                                    p.POSITION_CONTROL, 
+                                    targetPosition=action[i],
+                                    #maxVelocity = max_servo_velocity, 
+                                    #force = max_servo_force
+                                    )
         
         p.stepSimulation()
         
@@ -192,10 +207,11 @@ class RobotEnv(gym.Env):
         # Negative Reward for body rotation
 
         self._distance_weight = 1.0 # To use in future when having a goal target position
-        self._energy_weight = 0.005
-        self._shake_weight = 0.005
+        self._energy_weight = 0.1 # typical energy values [0.01,0.1]
+        self._shake_weight = 10.0 #typical shake values [0.00001,0.001]
         self._drift_weight = 0.005
-        self._velocity_weight = 0.1
+        self._velocity_weight = .10 #typical velocity values [0.01,0.50]
+        self._jitter_weight = 0.1
     
         # Get the linear velocity of the base link of the robot
         # Calculate the magnitude (absolute value) of the linear velocity
@@ -214,10 +230,17 @@ class RobotEnv(gym.Env):
         self._last_base_position = self.current_base_position
 
         joint_states = p.getJointStates(self.robot_id, range(self.num_joints))
-        joint_torques = [state[3] for state in joint_states]
-        joint_motor_velocities = [state[1] for state in joint_states]
+        self.current_joint_positions = [state[0] for state in joint_states] #1x8 
+        self.current_joint_torques = [state[3] for state in joint_states]
+        self.current_joint_velocities = [state[1] for state in joint_states]
+
+        jitter_penalty = -sum(abs(np.array(self.current_joint_velocities) - np.array(self._last_joint_velocities)))
+
+        self._last_joint_positions  = self.current_joint_positions
+        self._last_joint_velocities = self.current_joint_velocities
         
-        energy_reward = abs(np.dot(joint_torques, joint_motor_velocities))  * self._time_step # Negative to penalize energy consumption E = (T*dq)/(delta(t))
+        
+        energy_reward = abs(np.dot(self.current_joint_torques, self.current_joint_velocities))  * self._time_step # Negative to penalize energy consumption E = (T*dq)/(delta(t))
 
         # Penalize falling 
         fall_weight = -1
@@ -226,7 +249,28 @@ class RobotEnv(gym.Env):
         # Penalize high angular velocities
         angular_penalty = -np.linalg.norm(angular_velocity)
 
-        reward = (self._velocity_weight*velocity_magnitude - self._energy_weight * energy_reward + self._shake_weight * shake_reward + fall_penalty)
+        # Debugging Rewards
+        # print('Velocity_magnitude: ', velocity_magnitude)
+        # print('Energy reward: -', energy_reward)
+        # print('Shake reward: ', shake_reward)
+        # print('Fall Penalty: ', fall_penalty)
+
+        target_velocity = 0.1 #m/s
+        epsilon = 0.000001 #small number
+        velocity_reward = self._velocity_weight * (1 / (abs(target_velocity - velocity_magnitude) + epsilon))
+
+        reward = (self._velocity_weight*velocity_magnitude # Reward for robot moving fast
+                  - self._energy_weight * energy_reward # Penality for motor consumption
+                  + self._shake_weight * shake_reward # Penalty for vertical shaking
+                  + fall_penalty #Penalty for falling
+                  )
+        
+        print(self.current_step, '  :', reward)
+        
+        # if fall_penalty != 0:
+        #     print(self.current_step, '  :', reward)
+
+        
 
         #No distance weight - Bounding
 

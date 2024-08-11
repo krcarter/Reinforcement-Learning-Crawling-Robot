@@ -1,2 +1,2 @@
- x_final_r = np.concatenate((x_rotated[::-1],xline))
-    y_final_r = np.concatenate((y_rotated[::-1],yline))
+maxVelocity = max_servo_velocity,
+            # force = max_servo_force

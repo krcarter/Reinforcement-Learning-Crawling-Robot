@@ -104,9 +104,15 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
 
-    Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
-    phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
-    Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, 0, 0, 0, 0]
+    Amp  = [np.pi/6, 0, 0, 0, 0, 0, 0, 0] 
+    phi  = [0, 0, 0, 0, 0, 0, 0, 0]
+    Amp0 = [0, 0, 0, 0, 0, 0, 0, 0]
+
+    #best gait
+    # Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
+    # phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    # Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, 0, 0, 0, 0]
+    
     thetas = np.tile(intiial_position, (num_steps, 1)).T
 
     for joint in range(len(intiial_position)):

@@ -446,13 +446,21 @@ def load_and_visualize_urdf(urdf_path):
                 break
         
             target_position = trajectory[:, step]
+            
+            #MG995 Servo Specs
+            max_servo_velocity = 8.055 #rad/s
+            max_servo_force = 1.177 #Nm
+
+            # maxVelocity = max_servo_velocity,
+            # force = max_servo_force
 
             p.setJointMotorControlArray(
                 bodyUniqueId = urdf_id, 
                 jointIndices = joint_index_list,
                 controlMode = p.POSITION_CONTROL,
-                targetPositions = target_position)
-
+                targetPositions = target_position,
+                maxVelocity = max_servo_velocity,
+                )
             # # Apply the target joint position to the robot
             # p.setJointMotorControL2(
             #     bodyUniqueId=urdf_id,

@@ -129,14 +129,14 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
 
-    # Amp  = [(2/12)*np.pi, 0, 0, 0, 0, 0, 0, 0] 
-    # phi  = [0, 0, 0, 0, 0, 0, 0, 0]
-    # Amp0 = [-(0/12)*np.pi, 0, 0, 0, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
+    Amp  = [(1/6)*np.pi, 0, 0, 0, 0, 0, 0, 0] 
+    phi  = [0, 0, 0, 0, 0, 0, 0, 0]
+    Amp0 = [(1/6)*np.pi, 0, 0, 0, 0,0,0,0]
 
     # Regular Walking
-    Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
-    phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
-    Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
+    # Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
+    # phi  = [0, 0, 0, 0, np.pi/2, np.pi/2, np.pi/2, np.pi/2]
+    # Amp0 = [-np.pi/12, (5/12)*np.pi, np.pi/12, -(5/12)*np.pi, np.pi/2, np.pi/12, -np.pi/2, -np.pi/12]
     
     # Quick Step trajectories
     # Amp  = [np.pi/24, np.pi/12, np.pi/24, np.pi/12, 0, 0, 0, 0] 
@@ -199,8 +199,10 @@ def load_and_visualize_urdf(urdf_path):
     p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
     # Load the URDF file
-    basePosition = [0, 0, .3]
-    baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
+    basePosition = [0, 0, .2]
+    #baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
+    baseOrientation = p.getQuaternionFromEuler([np.pi/2, -np.pi/2, 0]) # Robot lying on its side
+    #baseOrientation = p.getQuaternionFromEuler([np.pi/2, np.pi/2, 0]) # Robot lying on its other side
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT
     urdf_id = p.loadURDF(urdf_path, 
