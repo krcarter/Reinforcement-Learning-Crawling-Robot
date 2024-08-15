@@ -36,7 +36,7 @@ def evaluate_model(model_path, render):
     obs = env.reset()
 
     joint_position_list = np.empty((8, 0))
-    num_steps = 1000
+    num_steps = 200
 
     for _ in range(num_steps):
         #time.sleep(2)
@@ -50,6 +50,8 @@ def evaluate_model(model_path, render):
 
     time_list = np.linspace(0,num_steps,num_steps)
     plot_joint_positions(time_list, joint_position_list)
+
+    np.savetxt('sim_trajectory.csv', joint_position_list, delimiter=',')
 
 
 if __name__ == "__main__":
