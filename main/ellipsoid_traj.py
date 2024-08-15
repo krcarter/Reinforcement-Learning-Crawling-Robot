@@ -410,6 +410,11 @@ def load_and_visualize_urdf(urdf_path):
     degrees_trajectory = np.degrees(trajectory)
     rounded_trajectory = np.round(degrees_trajectory, 0)
 
+    # Sim to Real Coordinates transformations
+    # This should definately be some type of rotation + translation, but couldn't figure it out
+    # The Servo motors for physical robots are started at the 90 degree positon and range from 0 to 180 degrees
+    # while in the simulation the robot's servos range from [-pi to pi]
+
     rounded_trajectory[0] = rounded_trajectory[0] + 120
     rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
     rounded_trajectory[2] = rounded_trajectory[2] + 60
