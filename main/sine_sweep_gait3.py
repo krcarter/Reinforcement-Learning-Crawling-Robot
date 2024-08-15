@@ -165,7 +165,11 @@ def load_and_visualize_urdf(urdf_path):
     p.changeDynamics(plane_id, -1, lateralFriction=1.0)
 
     # Load the URDF file
-    basePosition = [0, 0, .3]
+    basePosition = [0, 0, .2]
+
+    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy? Robot laying flat
+    #initial_orientation = p.getQuaternionFromEuler([np.pi/2, -np.pi/2, 0]) # Robot lying on its side
+    #initial_orientation = p.getQuaternionFromEuler([np.pi/2, np.pi/2, 0]) # Robot lying on its other side
     baseOrientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) 
 
     flags = p.URDF_USE_SELF_COLLISION | p.URDF_USE_SELF_COLLISION_INCLUDE_PARENT

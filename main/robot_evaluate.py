@@ -1,7 +1,29 @@
 import argparse
 from stable_baselines3 import PPO
 from pybullet_envs.robot_env import RobotEnv
+import numpy as np
+import matplotlib.pyplot as plt
+
 import time
+
+def plot_joint_positions(time, trajectories):
+    #Plot the trajectories
+    plt.figure(figsize=(12, 8))
+    num_joint = len(trajectories)
+    print('num_joint: ', num_joint)
+    for joint in range(num_joint):
+        print(joint)
+        plt.plot(time, trajectories[joint], label=f'Joint {joint+1}')
+
+    plt.xlabel('Time [s]')
+    plt.ylabel('Joint Angle [rad]')
+    plt.title('Robot Joint trajectories')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
+# Display the plot
+plt.show()
 
 def evaluate_model(model_path, render):
     # Load the trained model
@@ -12,11 +34,23 @@ def evaluate_model(model_path, render):
 
     # Test the trained model
     obs = env.reset()
-    for _ in range(10000):
+
+    joint_position_list = np.empty((8, 0))
+    num_steps = 1000
+
+    for _ in range(num_steps):
         #time.sleep(2)
         action, _states = model.predict(obs)
         obs, rewards, dones, info = env.step(action)
-        env.render()
+        joint_positions  = env.render()
+
+        joint_positions_transposed = (np.array(joint_positions)).reshape((8,1))
+        joint_position_list = np.append(joint_position_list, joint_positions_transposed, axis=1)
+
+
+    time_list = np.linspace(0,num_steps,num_steps)
+    plot_joint_positions(time_list, joint_position_list)
+
 
 if __name__ == "__main__":
     
