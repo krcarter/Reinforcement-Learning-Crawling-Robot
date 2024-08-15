@@ -73,8 +73,8 @@ class RobotEnv(gym.Env):
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
 
         # Crawl Gait 1
-        action_low  = np.array([ 0,   0,-60, -120, -15,  75,-15, -105]) * np.pi/180
-        action_high = np.array([ 60, 120, 0,    0,  15, 105, 15,  -75]) * np.pi/180
+        action_low  = np.array([ -15,   0,-60, -120, -15,  75,-15, -105]) * np.pi/180
+        action_high = np.array([ 60, 120, 15,    0,  15, 105, 15,  -75]) * np.pi/180
 
         # Bound Gait 1
         # action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
@@ -265,7 +265,7 @@ class RobotEnv(gym.Env):
                   + fall_penalty #Penalty for falling
                   )
         
-        print(self.current_step, '  :', reward)
+        #print(self.current_step, '  :', reward)
         
         # if fall_penalty != 0:
         #     print(self.current_step, '  :', reward)
