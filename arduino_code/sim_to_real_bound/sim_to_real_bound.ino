@@ -14,7 +14,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 
 unsigned long previousMillis = 0;
-const long updateInterval = 20;  // updateInterval in milliseconds
+const long updateInterval = 40;  // updateInterval in milliseconds
 
 int currentPosition = 0;
 

@@ -14,7 +14,6 @@
 # Dependencies
 
 * Pybullet (Microsoft C++ Build Tools)
-* Microsoft C++ Build Tools (If running on windows)
 * matplotlib
 * numpy
 * gym==0.23.1
