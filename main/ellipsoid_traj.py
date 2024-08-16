@@ -464,7 +464,7 @@ def load_and_visualize_urdf(urdf_path):
                 jointIndices = joint_index_list,
                 controlMode = p.POSITION_CONTROL,
                 targetPositions = target_position,
-                maxVelocity = max_servo_velocity,
+                #maxVelocity = max_servo_velocity,
                 )
             # # Apply the target joint position to the robot
             # p.setJointMotorControL2(
