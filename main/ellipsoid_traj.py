@@ -378,7 +378,7 @@ def load_and_visualize_urdf(urdf_path):
     #print("JointInfo: ", p.getJointInfo(urdf_id))
     # Set the initial position and orientation of the URDF
     initial_position = [0, 0, .2] #x,y,z
-    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, 0]) # XYZW - rpy? Robot laying flat
+    initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) # XYZW - rpy? Robot laying flat
     #initial_orientation = p.getQuaternionFromEuler([np.pi/2, -np.pi/2, 0]) # Robot lying on its side
     #initial_orientation = p.getQuaternionFromEuler([np.pi/2, np.pi/2, 0]) # Robot lying on its other side
     p.resetBasePositionAndOrientation(urdf_id, initial_position, initial_orientation)
@@ -437,6 +437,10 @@ def load_and_visualize_urdf(urdf_path):
             
             # Write the array string to the file
             file.write(array_string)
+
+    crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+    print('INITIAL ROBOT POSITION: ')
+    print(crawlyPos,crawlyOrn)
             
     # Run the simulation
     while True:
@@ -476,8 +480,8 @@ def load_and_visualize_urdf(urdf_path):
       
             # Step the simulation
             p.stepSimulation()
-            #crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
-            #print(crawlyPos,crawlyOrn)
+            crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+            print(crawlyPos,crawlyOrn)
 
 
 

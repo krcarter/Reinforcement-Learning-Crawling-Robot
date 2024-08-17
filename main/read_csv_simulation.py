@@ -48,10 +48,10 @@ def arduino_text(trajectories):
             # Write the array string to the file
             file.write(array_string)
 
-sim_trajectory = np.loadtxt('sim_trajectory_bound.csv', delimiter=',')
+sim_trajectory = np.loadtxt('sim_trajectory_816.csv', delimiter=',')
 # Define the range of timesteps you want to plot
-start_timestep = 36
-end_timestep = 63
+start_timestep = 335
+end_timestep = 405
 
 # Step 2: Slice the data to get the desired range
 sim_slice = sim_trajectory[:, start_timestep:end_timestep]

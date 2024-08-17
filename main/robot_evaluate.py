@@ -22,9 +22,6 @@ def plot_joint_positions(time, trajectories):
     plt.grid(True)
     plt.show()
 
-# Display the plot
-plt.show()
-
 def evaluate_model(model_path, render):
     # Load the trained model
     model = PPO.load(model_path)
@@ -36,7 +33,7 @@ def evaluate_model(model_path, render):
     obs = env.reset()
 
     joint_position_list = np.empty((8, 0))
-    num_steps = 200
+    num_steps = 300
 
     for _ in range(num_steps):
         #time.sleep(2)
