@@ -406,7 +406,6 @@ def load_and_visualize_urdf(urdf_path):
 
 
     #Simulation to Real Conversion
-    print(type(trajectory))
     degrees_trajectory = np.degrees(trajectory)
     rounded_trajectory = np.round(degrees_trajectory, 0)
 

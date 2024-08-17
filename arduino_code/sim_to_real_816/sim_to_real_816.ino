@@ -50,7 +50,13 @@ void loop() {
     // Set the servo to the current position
     Serial.print(currentPosition);
     Serial.print(":  ");
-    Serial.println(row_1[currentPosition]);
+    Serial.print(row_1[currentPosition]);
+    Serial.print(", ");
+    Serial.print(row_2[currentPosition]);
+    Serial.print(", ");
+    Serial.print(row_3[currentPosition]);
+    Serial.print(", ");
+    Serial.println(row_4[currentPosition]);
 
 
     int J0 = map(row_1[currentPosition], 0, 180, SERVOMIN, SERVOMAX);

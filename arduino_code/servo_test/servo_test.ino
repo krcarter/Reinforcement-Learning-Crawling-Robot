@@ -19,7 +19,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 // our servo # counter
 uint8_t servonum = 0;
 
-const int increment = 10; // Degree increment
+const int increment = 5; // Degree increment
 
 void setup() {
   Serial.begin(9600);
