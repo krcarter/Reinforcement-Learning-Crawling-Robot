@@ -72,9 +72,17 @@ class RobotEnv(gym.Env):
         print("OBSERVATION SPACE SIZE: ", (self.num_joints*2,))
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
 
-        # Crawl Gait 1
-        action_low  = np.array([ -15,   0,-60, -120, -15,  75,-15, -105]) * np.pi/180
-        action_high = np.array([ 60, 120, 15,    0,  15, 105, 15,  -75]) * np.pi/180
+        # Crawl Gait 2 - Back legs flat Change more crawl forward
+        action_low  = np.array([ -75,  30,  0, -120, 90,  0, -90, 0]) * np.pi/180
+        action_high = np.array([   0, 120, 75,  -30, 90,  0, -90, 0]) * np.pi/180
+
+        # Crawl Gait 2 - Back legs flat
+        # action_low  = np.array([ -15,   0,-60, -120, 90,  0, -90, 0]) * np.pi/180
+        # action_high = np.array([ 60, 120, 15,    0,  90,  0, -90, 0]) * np.pi/180
+
+        # # Crawl Gait 1 - Back legs 90
+        # action_low  = np.array([ -15,   0,-60, -120, -15,  75,-15, -105]) * np.pi/180
+        # action_high = np.array([ 60, 120, 15,    0,  15, 105, 15,  -75]) * np.pi/180
 
         # Bound Gait 1
         # action_low  = np.array([-np.pi/6, np.pi/4, 0, (-7/12)*np.pi,-np.pi/6, np.pi/4, -np.pi/4, (-7/12)*np.pi])
@@ -146,6 +154,8 @@ class RobotEnv(gym.Env):
             time_to_sleep = self._action_repeat * self._time_step - time_spent
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
+            
+
 
         # Camera Tracks the robot
         self.camera_yaw += .001
@@ -183,13 +193,13 @@ class RobotEnv(gym.Env):
 
 
         joint_states = p.getJointStates(self.robot_id, range(self.num_joints))
-        joint_positions = [state[0] for state in joint_states] #1x8 
-        joint_velocities = [state[1] for state in joint_states] #1x8
+        self.current_joint_positions = [state[0] for state in joint_states] #1x8 
+        self.current_joint_velocities = [state[1] for state in joint_states] #1x8
 
         self.base_position, self.base_orientation = p.getBasePositionAndOrientation(self.robot_id) #1x3 [x,y,z], 1x4 [x,y,z,w]
         self.base_linear_velocity, self.base_angular_velocity = p.getBaseVelocity(self.robot_id) #1x3 [x,y,z], 1x3 [wx,wy,wz]
     
-        observation = np.concatenate([joint_positions, joint_velocities, self.base_position, self.base_orientation, self.base_linear_velocity, self.base_angular_velocity]) #8+8+3+4+3+3 = 29 observed states
+        observation = np.concatenate([self.current_joint_positions, self.current_joint_velocities, self.base_position, self.base_orientation, self.base_linear_velocity, self.base_angular_velocity]) #8+8+3+4+3+3 = 29 observed states
 
         # Other Possible Observations 
         # If trying have robot reach a target:
@@ -207,9 +217,9 @@ class RobotEnv(gym.Env):
         # Negative Reward for body rotation
 
         self._distance_weight = 1.0 # To use in future when having a goal target position
-        self._energy_weight = 0.1 # typical energy values [0.01,0.1]
-        self._shake_weight = 10.0 #typical shake values [0.00001,0.001]
-        self._drift_weight = 0.005
+        self._energy_weight = 0.005 # typical energy values [0.01,0.1]
+        self._shake_weight = 0.0 #typical shake values [0.00001,0.001]
+        self._drift_weight = 0.0
         self._velocity_weight = .10 #typical velocity values [0.01,0.50]
         self._jitter_weight = 0.1
     
@@ -258,12 +268,24 @@ class RobotEnv(gym.Env):
         target_velocity = 0.1 #m/s
         epsilon = 0.000001 #small number
         velocity_reward = self._velocity_weight * (1 / (abs(target_velocity - velocity_magnitude) + epsilon))
+        
 
-        reward = (self._velocity_weight*velocity_magnitude # Reward for robot moving fast
-                  - self._energy_weight * energy_reward # Penality for motor consumption
-                  + self._shake_weight * shake_reward # Penalty for vertical shaking
+        # Copy of Minitaur reward with fall penalty added
+
+        reward = (self._distance_weight * forward_reward 
+                  - self._energy_weight * energy_reward 
+                  + self._drift_weight * drift_reward 
+                  + self._shake_weight * shake_reward
                   + fall_penalty #Penalty for falling
                   )
+
+
+        # This is the reward I used during 811
+        # reward = (self._velocity_weight*velocity_magnitude # Reward for robot moving fast
+        #           - self._energy_weight * energy_reward # Penality for motor consumption
+        #           + self._shake_weight * shake_reward # Penalty for vertical shaking
+        #           + fall_penalty #Penalty for falling
+        #           )
         
         #print(self.current_step, '  :', reward)
         
@@ -303,13 +325,13 @@ class RobotEnv(gym.Env):
         # Check if the robot has fallen over (adjust the threshold as needed)
         # fallen when 0 > roll > pi or -pi/2 < pitch > pi/2 
         # if (np.pi/12) > roll or roll > ((11/12)*np.pi) or (-5/12)*np.pi > pitch  or pitch > (5/12)*np.pi:
-        if roll < -np.pi/2 or roll > (3/2)*np.pi or pitch < -(1/2)*np.pi  or pitch > (1/2)*np.pi:
+        if roll < -np.pi/2 or roll > (2/2)*np.pi or pitch < -(1/2)*np.pi  or pitch > (1/2)*np.pi:
             return True
         return False
 
 
     def render(self, mode='human'):
-        pass
+        return self.current_joint_positions 
 
     def close(self):
         p.disconnect(self.physics_client)
