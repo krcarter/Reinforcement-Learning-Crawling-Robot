@@ -414,10 +414,17 @@ def load_and_visualize_urdf(urdf_path):
     # The Servo motors for physical robots are started at the 90 degree positon and range from 0 to 180 degrees
     # while in the simulation the robot's servos range from [-pi to pi]
 
-    rounded_trajectory[0] = rounded_trajectory[0] + 120
-    rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
-    rounded_trajectory[2] = rounded_trajectory[2] + 60
-    rounded_trajectory[3] = -1 * rounded_trajectory[3]
+    np.savetxt('ellipsoidCheck.csv', rounded_trajectory, delimiter=',')
+
+    # rounded_trajectory[0] = 90 - rounded_trajectory[0]
+    # rounded_trajectory[1] = rounded_trajectory[1]
+    # rounded_trajectory[2] = 90 - rounded_trajectory[2]
+    # rounded_trajectory[3] = 180 - (-1*rounded_trajectory[3])
+
+    # rounded_trajectory[0] = rounded_trajectory[0] + 120
+    # rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
+    # rounded_trajectory[2] = rounded_trajectory[2] + 60
+    # rounded_trajectory[3] = -1 * rounded_trajectory[3]
 
     ### CSV Trajectory ###
     np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')

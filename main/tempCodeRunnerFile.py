@@ -1,2 +1,1 @@
-
-end_timestep = 50
+            formatted_values = ','.join(f"{val:.0f}" for val in row)

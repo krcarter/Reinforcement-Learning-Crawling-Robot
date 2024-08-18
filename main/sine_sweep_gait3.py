@@ -104,9 +104,9 @@ def crawl_walk(time):
     # Generate the trajectory using a sine wave
     omega = 2 * np.pi * frequency
 
-    Amp  = [np.pi/6, 0, 0, 0, 0, 0, 0, 0] 
+    Amp  = [0, 0, 0, np.pi/6, 0, 0, 0, 0] 
     phi  = [0, 0, 0, 0, 0, 0, 0, 0]
-    Amp0 = [0, 0, 0, 0, 0, 0, 0, 0]
+    Amp0 = [0, 0, 0, -np.pi/6, 0, 0, 0, 0]
 
     #best gait
     # Amp  = [np.pi/12, np.pi/6, np.pi/12, np.pi/6, 0, 0, 0, 0] 
