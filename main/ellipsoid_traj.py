@@ -271,7 +271,8 @@ def plot_xy(x, y):
 def walk(time, timestep):
     #
     #intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
-    intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
+    intiial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
+    #intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
