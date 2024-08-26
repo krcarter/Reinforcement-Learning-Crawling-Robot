@@ -98,7 +98,16 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
 
     return (x_final, y_final,x_final_r,y_final_r)
 
-def foot_trajectory(num_steps):
+def offset_swing(thetas,percent):
+    
+    thetas_length = len(thetas)
+    start_index = int( (percent/100) * thetas_length)
+
+    offset_thetas = np.concatenate((thetas[start_index:],thetas[:start_index]))
+
+    return offset_thetas
+
+def foot_trajectory(num_steps, percent_offset = 70):
     # Parameters
     a1 = 0.10/2  # Major axis length
     b1 = 0.05  # Minor axis length
@@ -108,18 +117,21 @@ def foot_trajectory(num_steps):
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin1 = np.array([0.15, 0.05])  # Origin of the ellipse
+    origin = np.array([0.15, 0.05])  # Origin of the ellipse
 
-    origin1 = np.matmul(R,origin1)
+    origin = np.matmul(R,origin)
 
-    rotation_angle1 = (1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
+    rotation_angle = (1/2)*np.pi + rotation_adjustment   # Rotation angle in radians
 
     # Generate half ellipse points
-    xl,yl,xr,yr = half_ellipse(a1, b1, origin1, rotation_angle1, num_steps)
+    xl,yl,xr,yr = half_ellipse(a1, b1, origin, rotation_angle, num_steps)
     # plot_xy(xl,yl)
     # plot_xy(xr,yr)
     (theta0,theta1) =  trajectory_to_angles(xl,yl)
     (theta2,theta3) =  trajectory_to_angles(xr,yr)
+
+    theta2 = offset_swing(theta2,percent_offset)
+    theta3 = offset_swing(theta3,percent_offset)
 
     #
     (xl_c,yl_c) = fk(theta0, theta1)
@@ -270,9 +282,9 @@ def plot_xy(x, y):
 
 def walk(time, timestep):
     #
-    #intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
-    intiial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
-    #intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
+    intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
+    #intiial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
+    intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
