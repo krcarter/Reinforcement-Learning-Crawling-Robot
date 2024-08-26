@@ -33,7 +33,7 @@ def evaluate_model(model_path, render):
     obs = env.reset()
 
     joint_position_list = np.empty((8, 0))
-    num_steps = 300
+    num_steps = 10000
 
     for _ in range(num_steps):
         #time.sleep(2)
