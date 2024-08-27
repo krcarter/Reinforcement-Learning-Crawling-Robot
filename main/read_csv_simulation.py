@@ -30,13 +30,14 @@ def arduino_text(trajectories):
     num_steps = trajectories.shape[1]
     trajectories = np.degrees(trajectories)
 
+    # Math to transform simulation angles to the robot arduino angles
     trajectories[0] = 90 - trajectories[0]
     trajectories[1] = trajectories[1]
     trajectories[2] = 90 - trajectories[2]
     trajectories[3] = 180 - (-1*trajectories[3])
 
 
-    with open('sim_to_real_818_crawl.txt', 'w') as file:
+    with open('sim_to_real_826.txt', 'w') as file:
         for idx, row in enumerate(trajectories, start=1):
             # Format each value in the row no decimals
             formatted_values = ','.join(f"{val:.0f}" for val in row)
@@ -48,10 +49,10 @@ def arduino_text(trajectories):
             # Write the array string to the file
             file.write(array_string)
 
-sim_trajectory = np.loadtxt('sim_trajectory_818_crawl.csv', delimiter=',')
+sim_trajectory = np.loadtxt('sim_trajectory_26.csv', delimiter=',')
 # Define the range of timesteps you want to plot
-start_timestep = 38
-end_timestep = 117
+start_timestep = 37
+end_timestep = 87
 
 # Step 2: Slice the data to get the desired range
 sim_slice = sim_trajectory[:, start_timestep:end_timestep]

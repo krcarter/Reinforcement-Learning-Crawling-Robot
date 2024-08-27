@@ -17,7 +17,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 #define servoChannel 3
 
 // our servo # counter
-uint8_t servonum = 0;
+uint8_t servonum = 1;
 
 const int increment = 5; // Degree increment
 
