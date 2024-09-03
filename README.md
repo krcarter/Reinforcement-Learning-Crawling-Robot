@@ -4,21 +4,27 @@
 
  # Hardware
 
- URDF, CAD files, and robot BOM can be found in the hardware folder. Currently the pybullet code reference the urdf from the pybullet directory, so you can either change that reference in the code or move the urdf and mesh files to the pybullet directory you are working on.
+ URDF, CAD files are in the hardware folder.
 
  To create your own custom URDF for bullet using fusion 360 for CAD checkout this github repo
 
  * https://github.com/yanshil/Fusion2PyBullet (Need to change the color, remove transmissions)
+
+ ## Bill of Materials
  
+ 1. [8x MG-995 Servos Motors](https://www.amazon.com/Control-Angle180-Digital-Torque-Helicopter/dp/B07NQJ1VZ2)
+ 2. [Arduino Uno](https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6)
+ 3. [PCA9685 Servo Board](https://www.amazon.com/HiLetgo-PCA9685-Channel-12-Bit-Arduino/dp/B07BRS249H)
+ 4. [2s Lipo Battery 50C 2200mAh](https://www.amazon.com/gp/product/B07L6BVRDG)
 
-# Dependencies
+# Python Dependencies
 
-* Pybullet (Microsoft C++ Build Tools)
-* matplotlib
-* numpy
+* pybullet==3.2.6 (For windows need to also install Microsoft C++ Build Tools)
+* matplotlib==3.6.3
+* numpy==1.26.4
 * gym==0.23.1
-* tensorflow
-* stable-baselines3
+* tensorflow == 2.17.0
+* stable-baselines3 == 2.3.2
 * shimmy == 0.2.1
 
 # References (Resources got inspiration from)

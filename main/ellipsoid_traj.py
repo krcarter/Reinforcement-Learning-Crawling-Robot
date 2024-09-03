@@ -28,7 +28,7 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     R = np.array([[np.cos(rotation_angle), -np.sin(rotation_angle)],
                   [np.sin(rotation_angle),  np.cos(rotation_angle)]])
     
-    swing_speed = 0.30 # 0 to 1 Percentage
+    swing_speed = 0.30 # 0 to 1 Percentage Adjust to determine swing speed
     swing_pts = int(num_pts*(1-swing_speed))
     stance_pts = int(num_pts*(swing_speed))
     
@@ -43,21 +43,6 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     rotated_points = R @ ellipse_points
 
     x_rotated, y_rotated = rotated_points[0] + origin[0], rotated_points[1] + origin[1]
-
-    # This is if I want the swing phase to model off of a ellipse also
-
-    # theta_inner = np.linspace(0, np.pi, swing_pts)
-    # minor_axis_shrink = 4
-    # x_inner = a * np.cos(theta_inner)
-    # y_inner = b/minor_axis_shrink * np.sin(theta_inner)
-    # ellipse_inner_points = np.array([x_inner, y_inner])
-    # rotated_inner_points = R @ ellipse_inner_points
-    # x_inner_rotated, y_inner_rotated = rotated_inner_points[0] + origin[0], rotated_inner_points[1] + origin[1]
-    # x_final = x_inner_rotated
-    # y_final = y_inner_rotated
-
-    # x_final = np.concatenate((x_rotated,x_inner_rotated[::-1]))
-    # y_final = np.concatenate((y_rotated,y_inner_rotated[::-1]))
     
     # Straight line trajectory
     xo = x_rotated[0]
@@ -68,35 +53,16 @@ def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     xline = np.linspace(xo, xf, stance_pts)
     yline = np.linspace(yo, yf, stance_pts)
 
-    # x_final = np.concatenate((xline,x_rotated))
-    # y_final = np.concatenate((yline,y_rotated))
-
-    print('Length of stance x:  ',len(x_rotated))
-    print('Length of swing x:  ',len(xline))
-
-    x_final = np.concatenate((x_rotated[::-1],xline))
-    y_final = np.concatenate((y_rotated[::-1],yline))
-
-    # x_final_r = x_rotated
-    # y_final_r = y_rotated
+    # Originally was going to adjust x and y kinematics for right and left leg here
+    # but decided to create another function, offset swings for that
+    x_final_l = np.concatenate((x_rotated[::-1],xline))
+    y_final_l = np.concatenate((y_rotated[::-1],yline))
     
-    # Working both arms move at the same time
     x_final_r = np.concatenate((x_rotated[::-1],xline))
     y_final_r = np.concatenate((y_rotated[::-1],yline))
 
-    # x_final_r = x_rotated[::-1]
-    # y_final_r = y_rotated[::-1]
 
-    # x_final_r = np.concatenate((x_rotated,xline[::-1]))
-    # y_final_r = np.concatenate((y_rotated,yline[::-1]))
-
-
-    print(x_final)
-    print(x_final.shape)
-    print(y_final)
-    print(y_final.shape)
-
-    return (x_final, y_final,x_final_r,y_final_r)
+    return (x_final_l, y_final_l, x_final_r, y_final_r)
 
 def offset_swing(thetas,percent):
     
@@ -109,10 +75,13 @@ def offset_swing(thetas,percent):
 
 def foot_trajectory(num_steps, percent_offset = 70):
     # Parameters
+    # Hard coding the parameters of the ellipse trajectory
+    # Come here to modify values if you want to change how the robot walks
+
     a1 = 0.10/2  # Major axis length
     b1 = 0.05  # Minor axis length
 
-    rotation_adjustment = -5 * (np.pi/180)
+    rotation_adjustment = -5 * (np.pi/180) # tilts the leg walking up
 
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
@@ -130,24 +99,16 @@ def foot_trajectory(num_steps, percent_offset = 70):
     (theta0,theta1) =  trajectory_to_angles(xl,yl)
     (theta2,theta3) =  trajectory_to_angles(xr,yr)
 
+    # Percent offset is between 0 to 100
+    # This number adjust the starting point between left and right leg
     theta2 = offset_swing(theta2,percent_offset)
     theta3 = offset_swing(theta3,percent_offset)
 
-    #
+    # Plots the Forward Kinematics
     (xl_c,yl_c) = fk(theta0, theta1)
     (xr_c,yr_c) = fk(-theta2, -theta3)
 
     
-    # Parameters
-    # a2 = 0.3/2  # Major axis length
-    # b2 = 0.25/2  # Minor axis length
-    # origin2 = (0.0, 0.0)  # Origin of the ellipse
-    # rotation_angle2 = -np.pi/4  # Rotation angle in radians
-
-    # xb, yb = half_ellipse(a2, b2, origin2, rotation_angle2, num_steps)
-    # plot_xy(xb,yb)
-    # (theta4,theta5) =  trajectory_to_angles(xb,yb)
-    #print('hi')
     return (theta0,theta1,-theta2,-theta3)
 
 def fk(th1, th2):
@@ -278,11 +239,52 @@ def plot_xy(x, y):
     #plt.axis('equal')
     plt.show()
 
+def sim_to_real_text_file(trajectory, num_steps):
+    #Simulation to Real Conversion
+    degrees_trajectory = np.degrees(trajectory)
+    rounded_trajectory = np.round(degrees_trajectory, 0)
+
+    np.savetxt('ellipsoidCheck.csv', rounded_trajectory, delimiter=',')
+
+    # Sim to Real Coordinates transformations
+    # This should definately be some type of rotation + translation, but couldn't figure it out
+    # The Servo motors for physical robots are started at the 90 degree positon and range from 0 to 180 degrees
+    # while in the simulation the robot's servos range from [-pi to pi]
+
+
+    rounded_trajectory[0] = 90 - rounded_trajectory[0]
+    rounded_trajectory[1] = rounded_trajectory[1]
+    rounded_trajectory[2] = 90 - rounded_trajectory[2]
+    rounded_trajectory[3] = 180 - (-1*rounded_trajectory[3])
+
+    # rounded_trajectory[0] = rounded_trajectory[0] + 120
+    # rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
+    # rounded_trajectory[2] = rounded_trajectory[2] + 60
+    # rounded_trajectory[3] = -1 * rounded_trajectory[3]
+
+    ### CSV Trajectory ###
+    np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
+
+    ### Text File ###
+
+    # Open a text file to write the formatted arrays
+    with open('arduino_arrays.txt', 'w') as file:
+        for idx, row in enumerate(rounded_trajectory, start=1):
+            # Format each value in the row no decimals
+            formatted_values = ','.join(f"{val:.0f}" for val in row)
+            
+            # Create the Arduino array string
+            #num_steps_string = str(num_steps)
+            array_string = f"int row_{idx}[{num_steps}] = {{ {formatted_values} }};\n"
+            
+            # Write the array string to the file
+            file.write(array_string)
+
 
 
 def walk(time, timestep):
     #
-    intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
+    #intiial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
     #intiial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
     intiial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
     # Define the parameters for the circular sweep
@@ -350,15 +352,6 @@ def load_and_visualize_urdf(urdf_path):
     print(joint_index_list)
 
     ## INFO DEBUGGING ##
-    '''
-    for joint in range(num_joint):
-        p.enableJointForceTorqueSensor(urdf_id, joint, 1)
-        print('JointInfo' + str(joint) + ": ", p.getJointInfo(urdf_id, joint))
-    print('Joint States')
-    joint_state = p.getJointStates(urdf_id, joint_index_list)
-    # position
-     print(joint_state)
-    '''
 
     # print('Joint States: ')
     # joint_state = p.getJointStates(urdf_id, joint_index_list)
@@ -379,16 +372,8 @@ def load_and_visualize_urdf(urdf_path):
     # print(p.getBodyInfo)
 
 
-    # Commanding Joints
-    # p.setJointMotorControlArray(
-    #     bodyUniqueId = urdf_id, 
-    #     jointIndices = joint_index_list,
-    #     controlMode = p.POSITION_CONTROL,
-    #     targetPositions = initial_joint_angles)
-
     ## INFO DEBUGGING End ##
 
-    #print("JointInfo: ", p.getJointInfo(urdf_id))
     # Set the initial position and orientation of the URDF
     initial_position = [0, 0, .2] #x,y,z
     initial_orientation = p.getQuaternionFromEuler([np.pi/2, 0, np.pi/2]) # XYZW - rpy? Robot laying flat
@@ -417,50 +402,13 @@ def load_and_visualize_urdf(urdf_path):
 
     trajectory = walk(sweep_duration,timestep) # 8 x n array
 
-
-    #Simulation to Real Conversion
-    degrees_trajectory = np.degrees(trajectory)
-    rounded_trajectory = np.round(degrees_trajectory, 0)
-
-    # Sim to Real Coordinates transformations
-    # This should definately be some type of rotation + translation, but couldn't figure it out
-    # The Servo motors for physical robots are started at the 90 degree positon and range from 0 to 180 degrees
-    # while in the simulation the robot's servos range from [-pi to pi]
-
-    np.savetxt('ellipsoidCheck.csv', rounded_trajectory, delimiter=',')
+    # Generate a text file that makes it simple to make an arduino array from
+    sim_to_real_text_file(trajectory, num_steps)
 
 
-    rounded_trajectory[0] = 90 - rounded_trajectory[0]
-    rounded_trajectory[1] = rounded_trajectory[1]
-    rounded_trajectory[2] = 90 - rounded_trajectory[2]
-    rounded_trajectory[3] = 180 - (-1*rounded_trajectory[3])
-
-    # rounded_trajectory[0] = rounded_trajectory[0] + 120
-    # rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
-    # rounded_trajectory[2] = rounded_trajectory[2] + 60
-    # rounded_trajectory[3] = -1 * rounded_trajectory[3]
-
-    ### CSV Trajectory ###
-    np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
-
-    ### Text File ###
-
-    # Open a text file to write the formatted arrays
-    with open('arduino_arrays.txt', 'w') as file:
-        for idx, row in enumerate(rounded_trajectory, start=1):
-            # Format each value in the row no decimals
-            formatted_values = ','.join(f"{val:.0f}" for val in row)
-            
-            # Create the Arduino array string
-            #num_steps_string = str(num_steps)
-            array_string = f"int row_{idx}[{num_steps}] = {{ {formatted_values} }};\n"
-            
-            # Write the array string to the file
-            file.write(array_string)
-
-    crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
-    print('INITIAL ROBOT POSITION: ')
-    print(crawlyPos,crawlyOrn)
+    # crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+    # print('INITIAL ROBOT POSITION: ')
+    # print(crawlyPos,crawlyOrn)
             
     # Run the simulation
     while True:
@@ -476,10 +424,10 @@ def load_and_visualize_urdf(urdf_path):
         
             target_position = trajectory[:, step]
             
+            # Doing some velocity and force limit test but it wasn't working
             #MG995 Servo Specs
             max_servo_velocity = 8.055 #rad/s
             max_servo_force = 1.177 #Nm
-
             # maxVelocity = max_servo_velocity,
             # force = max_servo_force
 
@@ -490,18 +438,12 @@ def load_and_visualize_urdf(urdf_path):
                 targetPositions = target_position,
                 #maxVelocity = max_servo_velocity,
                 )
-            # # Apply the target joint position to the robot
-            # p.setJointMotorControL2(
-            #     bodyUniqueId=urdf_id,
-            #     jointIndex=joint_index,
-            #     controlMode=p.POSITION_CONTROL,
-            #     targetPosition=target_position
-            # )
       
             # Step the simulation
             p.stepSimulation()
-            crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
-            print(crawlyPos,crawlyOrn)
+
+            # crawlyPos, crawlyOrn = p.getBasePositionAndOrientation(urdf_id)
+            # print(crawlyPos,crawlyOrn)
 
 
 
