@@ -249,18 +249,12 @@ def sim_to_real_text_file(trajectory, num_steps):
     # Sim to Real Coordinates transformations
     # This should definately be some type of rotation + translation, but couldn't figure it out
     # The Servo motors for physical robots are started at the 90 degree positon and range from 0 to 180 degrees
-    # while in the simulation the robot's servos range from [-pi to pi]
-
+    # while in the simulation the robot's servos range from [-90 to 90]
 
     rounded_trajectory[0] = 90 - rounded_trajectory[0]
     rounded_trajectory[1] = rounded_trajectory[1]
     rounded_trajectory[2] = 90 - rounded_trajectory[2]
     rounded_trajectory[3] = 180 - (-1*rounded_trajectory[3])
-
-    # rounded_trajectory[0] = rounded_trajectory[0] + 120
-    # rounded_trajectory[1] = 90 - (rounded_trajectory[1] - 90)
-    # rounded_trajectory[2] = rounded_trajectory[2] + 60
-    # rounded_trajectory[3] = -1 * rounded_trajectory[3]
 
     ### CSV Trajectory ###
     np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
@@ -447,7 +441,7 @@ def load_and_visualize_urdf(urdf_path):
 
 
 
-    # Disconnect from PyBullet
+    #Disconnect from PyBullet
     #p.disconnect() # won't reach here because while loop never breaks at the moment
 
 # Path to your URDF file
