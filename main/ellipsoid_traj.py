@@ -445,5 +445,5 @@ def load_and_visualize_urdf(urdf_path):
     #p.disconnect() # won't reach here because while loop never breaks at the moment
 
 # Path to your URDF file
-urdf_path = "crawly/crawly.urdf"  # Change this to your URDF file path
+urdf_path = "urdf/crawly.urdf"  # Change this to your URDF file path
 load_and_visualize_urdf(urdf_path)
