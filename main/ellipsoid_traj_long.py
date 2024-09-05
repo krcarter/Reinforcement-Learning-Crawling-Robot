@@ -6,8 +6,8 @@ import numpy as np
 import time
 import os
 
-L1 = 0.06 # m
-L2 = 0.06 # m
+L1 = 0.1 # m
+L2 = 0.1 # ma
 
 def half_ellipse(a, b, origin=(0, 0), rotation_angle=0, num_pts =240):
     """
@@ -78,15 +78,15 @@ def foot_trajectory(num_steps, percent_offset = 70):
     # Hard coding the parameters of the ellipse trajectory
     # Come here to modify values if you want to change how the robot walks
 
-    a1 = 0.020  # Major axis length
-    b1 = 0.020  # Minor axis length
+    a1 = 0.10/2  # Major axis length
+    b1 = 0.05  # Minor axis length
 
     rotation_adjustment = -5 * (np.pi/180) # tilts the leg walking up
 
     R = np.array([[np.cos(rotation_adjustment), -np.sin(rotation_adjustment)],
                   [np.sin(rotation_adjustment),  np.cos(rotation_adjustment)]])
 
-    origin = np.array([0.10, 0.02])  # Origin of the ellipse
+    origin = np.array([0.15, 0.05])  # Origin of the ellipse
 
     origin = np.matmul(R,origin)
 
