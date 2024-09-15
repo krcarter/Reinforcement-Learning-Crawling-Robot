@@ -14,10 +14,10 @@ model = PPO('MlpPolicy', env, verbose=1, learning_rate=5e-5, n_steps=4096, batch
 
 # Train the model
 #model.learn(total_timesteps = 10_000)
-#model.learn(total_timesteps = 100_000)
+model.learn(total_timesteps = 100_000)
 #model.learn(total_timesteps = 1_000_000)
 #model.learn(total_timesteps=10_000_000)
-model.learn(total_timesteps=20_000_000)
+#model.learn(total_timesteps=20_000_000)
 
 # Save the model
 model.save("ppo_robot")
