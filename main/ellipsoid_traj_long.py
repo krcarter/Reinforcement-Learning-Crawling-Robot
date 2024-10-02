@@ -280,8 +280,8 @@ def walk(time, timestep):
     #
     #initial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
     #initial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
-    #initial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
-    initial_position = np.array([   0, 90, 0,  -90, 0,  120, 0, -120]) * np.pi/180 # back legs down but slightly up
+    initial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
+    #initial_position = np.array([   0, 90, 0,  -90, 0,  120, 0, -120]) * np.pi/180 # back legs down but slightly up
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)
