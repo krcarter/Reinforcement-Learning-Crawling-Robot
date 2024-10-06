@@ -48,7 +48,7 @@ def evaluate_model(model_path, render):
     time_list = np.linspace(0,num_steps,num_steps)
     plot_joint_positions(time_list, joint_position_list)
 
-    np.savetxt('sim_trajectory.csv', joint_position_list, delimiter=',')
+    np.savetxt('best_crawl.csv', joint_position_list, delimiter=',')
 
 
 if __name__ == "__main__":

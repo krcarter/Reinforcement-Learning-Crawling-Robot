@@ -134,16 +134,16 @@ def fk(th1, th2):
 
     # Plot the trajectory with a gradient color
     for i in range(len(x) - 1):
-        plt.plot(x[i:i+2], y[i:i+2], color=colors[i], linewidth=2)
+        plt.plot(x[i:i+2], y[i:i+2], color=colors[i], linewidth=5)
     #plt.plot(xr, yr, label='Leg Rotated')
     for i in range(len(xr) - 1):
-        plt.plot(xr[i:i+2], yr[i:i+2], color=colors[i], linewidth=2)
+        plt.plot(xr[i:i+2], yr[i:i+2], color=colors[i], linewidth=5)
     plt.scatter([x[0], x[-1]], [y[0], y[-1]], color='red')  # Plot endpoints for clarity
     plt.scatter([xr[0], xr[-1]], [yr[0], yr[-1]], color='red')  # Plot endpoints for clarity
     plt.xlabel('x [m]')
     plt.ylabel('y [m]')
-    plt.axhline(0, color='black',linewidth=0.5)
-    plt.axvline(0, color='black',linewidth=0.5)
+    plt.axhline(0, color='black',linewidth=1.0)
+    plt.axvline(0, color='black',linewidth=1.0)
     plt.ylim([-0.2,0.2])
     plt.xlim([-0.2,0.2])
     plt.title('Forward Kinematics')
@@ -280,8 +280,8 @@ def walk(time, timestep):
     #
     #initial_position = [0, np.pi/2, 0, -np.pi/2, np.pi/2, 0, -np.pi/2, 0] #laying flat
     #initial_position = np.array([ 0,  90,  0, -90, 0, 45,  0, -45]) * np.pi/180
-    initial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
-    #initial_position = np.array([   0, 90, 0,  -90, 0,  120, 0, -120]) * np.pi/180 # back legs down but slightly up
+    #initial_position = [0, np.pi/2, 0, -np.pi/2, 0, np.pi/2, 0, -np.pi/2] # back legs down
+    initial_position = np.array([   0, 90, 0,  -90, 0,  95, 0, -95]) * np.pi/180 # back legs down but slightly up
     # Define the parameters for the circular sweep
     sweep_duration = time  # duration of the sweep in seconds
     frequency = 1.0       # frequency of the sine wave (1 cycle per sweep_duration)

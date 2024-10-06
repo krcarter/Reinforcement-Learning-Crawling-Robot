@@ -24,7 +24,7 @@ const int updateInterval = 20; // Update interval in milliseconds
 uint8_t servonum = 0;
 
 const float pi = 3.14159265358979323846;
-const float frequency = 5.0; // Frequency in Hz
+const float frequency = 1.0; // Frequency in Hz
 
 void setup() {
   Serial.begin(9600);
@@ -49,10 +49,12 @@ void loop() {
     int pulseLength = map(angle, 0, 180, SERVOMIN, SERVOMAX);
 
     //pwm.setPWM(servoChannel, 0, pulseLength);
-    pwm.setPWM(servoChannel, 0, pulseLength);
-    pwm.setPWM(2, 0, pulseLength);
+    //pwm.setPWM(servoChannel, 0, pulseLength);
+    //pwm.setPWM(2, 0, pulseLength);
     pwm.setPWM(4, 0, pulseLength);
+    pwm.setPWM(5, 0, pulseLength);
     pwm.setPWM(6, 0, pulseLength);
+    pwm.setPWM(7, 0, pulseLength);
       
     // Your servo command code here
   }
