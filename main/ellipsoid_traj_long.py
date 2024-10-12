@@ -244,7 +244,7 @@ def sim_to_real_text_file(trajectory, num_steps):
     degrees_trajectory = np.degrees(trajectory)
     rounded_trajectory = np.round(degrees_trajectory, 0)
 
-    np.savetxt('ellipsoidCheck.csv', rounded_trajectory, delimiter=',')
+    #np.savetxt('manual_walk_long.csv', rounded_trajectory, delimiter=',')
 
     # Sim to Real Coordinates transformations
     # This should definately be some type of rotation + translation, but couldn't figure it out
@@ -257,12 +257,12 @@ def sim_to_real_text_file(trajectory, num_steps):
     rounded_trajectory[3] = 180 - (-1*rounded_trajectory[3])
 
     ### CSV Trajectory ###
-    np.savetxt('trajectory.csv', rounded_trajectory, delimiter=',')
+    np.savetxt('manual_walk_long.csv', rounded_trajectory, delimiter=',')
 
     ### Text File ###
 
     # Open a text file to write the formatted arrays
-    with open('arduino_arrays.txt', 'w') as file:
+    with open('arduino_arrays_long.txt', 'w') as file:
         for idx, row in enumerate(rounded_trajectory, start=1):
             # Format each value in the row no decimals
             formatted_values = ','.join(f"{val:.0f}" for val in row)

@@ -1,4 +1,4 @@
-# PPO Crawling-Robot
+# Reinforcement Learning Crawling-Robot
 
 Built a simple quadruped robot that used reinforcement learning for walking. I trained the robot in [Pybullet](https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit?tab=t.0#heading=h.2ye70wns7io3).
 
@@ -46,7 +46,7 @@ register(
 )
 ```
 
-* Creating the `robot_env.py`. This is the big code up how to initilize robot into world how to reset, how to step simulation, how to get robot observation, and how to computer reward. This is is the main script that has to be modified
+* Creating the `robot_env.py`. This is the big code on how to initilize robot into world how to reset, how to step simulation, how to get robot observation, and how to computer reward. This is is the main script that has to be modified
 
 This script also has to be placed inside the pybullet_envs folder
 

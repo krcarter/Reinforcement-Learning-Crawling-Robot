@@ -6,6 +6,8 @@
 
 ## Bill of Materials
  
+ [Crawling Robot Bill of Materials](https://docs.google.com/spreadsheets/d/1Qh913g_B4fr31vWqntHaWgeFabi9nsJZdBvG8iXUXsA/edit?usp=sharing)
+
  1. [4x MG-995 Servos Motors](https://amzn.to/4dJvymz)
  2. [Arduino Uno](https://amzn.to/487Hr4Q)
  3. [PCA9685 Servo Board](https://amzn.to/3Nohsw9)
