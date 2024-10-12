@@ -2,20 +2,10 @@
 
  Reinforcement learning for crawling robot
 
- # Hardware
+# Hardware
 
- URDF, CAD files are in the hardware folder.
-
- To create your own custom URDF for bullet using fusion 360 for CAD checkout this github repo
-
- * https://github.com/yanshil/Fusion2PyBullet (Need to change the color, remove transmissions)
-
- ## Bill of Materials
- 
- 1. [8x MG-995 Servos Motors](https://www.amazon.com/Control-Angle180-Digital-Torque-Helicopter/dp/B07NQJ1VZ2)
- 2. [Arduino Uno](https://www.amazon.com/Arduino-A000066-ARDUINO-UNO-R3/dp/B008GRTSV6)
- 3. [PCA9685 Servo Board](https://www.amazon.com/HiLetgo-PCA9685-Channel-12-Bit-Arduino/dp/B07BRS249H)
- 4. [2s Lipo Battery 50C 2200mAh](https://www.amazon.com/gp/product/B07L6BVRDG)
+ URDF files are in the models folder
+ CAD files (step & STL) are in the hardware folder
 
 # Python Dependencies
 
@@ -27,7 +17,7 @@
 * stable-baselines3 == 2.3.2
 * shimmy == 0.2.1
 
-# References (Resources got inspiration from)
+# References (Cool papers)
 
 * Kamidi, Vinay R., Wael Saab, and Pinhas Ben-Tzvi. "Design and analysis of a novel planar robotic leg for high-speed locomotion." 2017 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS). IEEE, 2017.
 
