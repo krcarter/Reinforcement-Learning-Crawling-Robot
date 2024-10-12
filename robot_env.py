@@ -73,8 +73,12 @@ class RobotEnv(gym.Env):
         obs_dim = 2 * self.num_joints + 3 + 4 + 3 + 3 # Dimension of observation array
 
         # Crawl Gait 2 - Back legs flat Change more crawl forward
-        action_low  = np.array([ -75,  30,  0, -120, 90,  0, -90, 0]) * np.pi/180
-        action_high = np.array([   0, 120, 75,  -30, 90,  0, -90, 0]) * np.pi/180
+        action_low  = np.array([ -75,  30,  0, -120, 0,  70, 0, -110]) * np.pi/180
+        action_high = np.array([   0, 120, 75,  -30, 0,  110, 0,-70]) * np.pi/180
+
+        # # Crawl Gait 2 - Back legs flat Change more crawl forward
+        # action_low  = np.array([ -75,  30,  0, -120, 90,  0, -90, 0]) * np.pi/180
+        # action_high = np.array([   0, 120, 75,  -30, 90,  0, -90, 0]) * np.pi/180
 
         # Crawl Gait 2 - Back legs flat
         # action_low  = np.array([ -15,   0,-60, -120, 90,  0, -90, 0]) * np.pi/180
@@ -305,7 +309,7 @@ class RobotEnv(gym.Env):
 
 
         #reward =  velocity_magnitude + fall_penalty + angular_penalty # Testing if negative velocity the robot should come to a stop from training
-        #print("REWARD:", reward)
+        print("REWARD:", reward)
         #reward = 0 
         return reward
 

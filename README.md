@@ -4,7 +4,10 @@ Built a simple quadruped robot that used reinforcement learning for walking. I t
 
 Youtube Video: 
 
-![Pronk Gait](img/pronk.gif)
+
+![Table_Crawl](img/table_crawl.gif)  
+
+![Pronk Gait](img/pronk.gif) 
 
 # Hardware
 
@@ -20,7 +23,30 @@ Youtube Video:
 * stable-baselines3 == 2.3.2
 * shimmy == 0.2.1
 
+# Setting up the Training Enviornment
 
+Pybullet's documentation was a little hard for me to first understand on how to setup the learning enviornment. Two main things is 
+
+* initializing the enviornment in the `_init_.py` in the pybullet_envs folder
+
+```
+C:\Users\My PC\AppData\Local\Programs\Python\Python311\Lib\site-packages\pybullet_envs
+```
+
+Code to add to the `_init_.py`
+
+```
+register(
+    id='CrawlingRobot-v0',
+    entry_point='pybullet_envs:RobotEnv',
+    max_episode_steps=1000,
+    reward_threshold=1000.0
+)
+```
+
+* Creating the `robot_env.py`. This is the big code up how to initilize robot into world how to reset, how to step simulation, how to get robot observation, and how to computer reward. This is is the main script that has to be modified
+
+This script also has to be placed inside the pybullet_envs folder
 
 # References (Cool papers)
 
