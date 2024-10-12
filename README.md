@@ -25,6 +25,8 @@ Youtube Video:
 
 # Setting up the Training Enviornment
 
+![Pronk Sim](img/pronk_sim.gif) 
+
 Pybullet's documentation was a little hard for me to first understand on how to setup the learning enviornment. Two main things is 
 
 * initializing the enviornment in the `_init_.py` in the pybullet_envs folder

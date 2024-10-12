@@ -1,8 +1,0 @@
-matplotlib
-pybullet
-numpy
-gym==0.23.1
-tensorflow
-stable-baselines3
-shimmy == 0.2.1
-# stable-baselines3[extra]
