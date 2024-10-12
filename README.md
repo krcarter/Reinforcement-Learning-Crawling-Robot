@@ -1,11 +1,14 @@
-# Crawling-Robot
+# PPO Crawling-Robot
 
- Reinforcement learning for crawling robot
+Built a simple quadruped robot that used reinforcement learning for walking. I trained the robot in [Pybullet](https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit?tab=t.0#heading=h.2ye70wns7io3).
+
+Youtube Video: 
+
+![Pronk Gait](img/pronk.gif)
 
 # Hardware
 
- URDF files are in the models folder
- CAD files (step & STL) are in the hardware folder
+ URDF files are in the models folder. CAD files (step & STL) are in the hardware folder
 
 # Python Dependencies
 
@@ -16,6 +19,8 @@
 * tensorflow == 2.17.0
 * stable-baselines3 == 2.3.2
 * shimmy == 0.2.1
+
+
 
 # References (Cool papers)
 
