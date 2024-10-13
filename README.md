@@ -2,7 +2,7 @@
 
 Built a simple quadruped robot that used reinforcement learning for walking. I trained the robot in [Pybullet](https://docs.google.com/document/d/10sXEhzFRSnvFcl3XxNGhnD4N2SedqwdAvK3dsihxVUA/edit?tab=t.0#heading=h.2ye70wns7io3).
 
-Youtube Video: 
+Youtube Video: [https://youtu.be/Dv9h6W830aU?si=A5QDVAJMPijuq6lc](https://youtu.be/Dv9h6W830aU?si=A5QDVAJMPijuq6lc)
 
 
 ![Table_Crawl](img/table_crawl.gif)  
